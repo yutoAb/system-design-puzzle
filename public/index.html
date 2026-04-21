@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>システム設計パズル</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="layout">
+      <section class="intro">
+        <p class="eyebrow">システム設計パズル</p>
+        <h1 id="challengeTitle">面接官に説明できるアーキテクチャを組む</h1>
+        <p id="challengePrompt" class="prompt"></p>
+
+        <div class="challenge-switch">
+          <label for="challengeSelect">お題</label>
+          <select id="challengeSelect" aria-label="お題を選ぶ"></select>
+        </div>
+
+        <ol class="howto">
+          <li><strong>1. ピースを置く</strong>：右のピースを、左のレーンへドラッグ。</li>
+          <li><strong>2. 接続する</strong>：置いたピースをクリック→別のピースをクリックして線でつなぐ。</li>
+          <li><strong>3. 採点する</strong>：必要な接続が揃うとスコアが上がる。</li>
+        </ol>
+
+        <div id="requirements" class="requirements"></div>
+      </section>
+
+      <section class="workspace">
+        <div class="board" aria-label="アーキテクチャボード">
+          <div class="board-overlay">
+            <div class="budget">
+              <span>アーキテクチャ予算</span>
+              <strong id="budgetValue">0/0</strong>
+              <meter id="budgetMeter" min="0" max="100" value="0"></meter>
+            </div>
+            <div class="connection-hint" id="connectionHint" aria-live="polite"></div>
+            <div id="board" class="lanes-and-edges">
+              <svg id="connectionLayer" class="connection-layer" aria-hidden="true"></svg>
+              <div id="selectedComponents" class="selected-components"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <h2>設計ピース</h2>
+          <p class="panel-copy">ピースをドラッグして、左のボードへ置きます。配置済みのピースだけが採点対象です。</p>
+          <form id="designForm">
+            <div id="componentList" class="component-list"></div>
+            <div class="actions">
+              <button type="submit">採点する</button>
+              <button type="button" id="resetBoard" class="secondary-button">配置を戻す</button>
+            </div>
+          </form>
+        </aside>
+      </section>
+
+      <section id="scoreResult" class="result" aria-live="polite"></section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
