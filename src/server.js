@@ -6,14 +6,15 @@ import { fileURLToPath } from "node:url";
 import { createGameController } from "./interface-adapters/gameController.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const publicDir = join(__dirname, "..", "public");
+const distDir = join(__dirname, "..", "dist");
 const gameController = createGameController();
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
-  ".svg": "image/svg+xml; charset=utf-8"
+  ".svg": "image/svg+xml; charset=utf-8",
+  ".ico": "image/x-icon"
 };
 
 const server = createServer(async (request, response) => {
@@ -27,22 +28,33 @@ const server = createServer(async (request, response) => {
       return sendJson(response, 200, gameController.submitDesign(body));
     }
 
-    const filePath = request.url === "/" ? "/index.html" : request.url;
-    const safePath = filePath.replace(/\.\./g, "");
-    const absolutePath = join(publicDir, safePath);
-    const content = await readFile(absolutePath);
+    const urlPath = request.url === "/" ? "/index.html" : request.url;
+    const safePath = urlPath.replace(/\.\./g, "");
+    const absolutePath = join(distDir, safePath);
 
-    response.writeHead(200, {
-      "Content-Type": contentTypes[extname(absolutePath)] ?? "text/plain"
-    });
-    response.end(content);
+    try {
+      const content = await readFile(absolutePath);
+      response.writeHead(200, {
+        "Content-Type": contentTypes[extname(absolutePath)] ?? "text/plain"
+      });
+      response.end(content);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+      const indexPath = join(distDir, "index.html");
+      const indexContent = await readFile(indexPath);
+      response.writeHead(200, { "Content-Type": contentTypes[".html"] });
+      response.end(indexContent);
+    }
   } catch (error) {
     if (error.code === "ENOENT") {
       response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-      response.end("見つかりません");
+      response.end(
+        "dist/ が見つかりません。先に npm run build を実行するか、npm run dev を使ってください。"
+      );
       return;
     }
-
     sendJson(response, 500, { error: error.message });
   }
 });
