@@ -414,6 +414,21 @@ h1 {
   padding: 12px;
 }
 
+.reference-toggle {
+  border-top: 1px dashed #9db8ad;
+  display: grid;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.reference-canvas {
+  background: #fafafa;
+  border: 1px solid #9db8ad;
+  border-radius: 6px;
+  height: 520px;
+  overflow: hidden;
+}
+
 .react-flow__handle {
   background: #1a5590;
   border: 2px solid #ffffff;

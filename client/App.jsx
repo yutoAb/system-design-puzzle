@@ -135,7 +135,12 @@ export function App() {
 
       {result && (
         <section className="result" aria-live="polite">
-          <Scoreboard result={result} componentById={componentById} />
+          <Scoreboard
+            result={result}
+            componentById={componentById}
+            challenge={activeChallenge}
+            components={components}
+          />
         </section>
       )}
     </div>

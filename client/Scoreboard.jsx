@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { ReferenceView } from "./ReferenceView.jsx";
+
 const dimensionLabels = {
   scalability: "スケール性",
   availability: "可用性",
@@ -6,7 +9,8 @@ const dimensionLabels = {
   requirements: "要件充足"
 };
 
-export function Scoreboard({ result, componentById }) {
+export function Scoreboard({ result, componentById, challenge, components }) {
+  const [showReference, setShowReference] = useState(false);
   const matched = result.matchedConnections ?? [];
   const missing = result.missingConnections ?? [];
   const formatPair = ([a, b]) =>
@@ -78,6 +82,25 @@ export function Scoreboard({ result, componentById }) {
             <p>{note.message}</p>
           </article>
         ))}
+      </div>
+
+      <div className="reference-toggle">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setShowReference((value) => !value)}
+        >
+          {showReference ? "模範解答を閉じる" : "模範解答を見る"}
+        </button>
+        {showReference && (
+          <>
+            <p className="panel-copy">
+              このゲームで想定している一例。書籍の図と完全一致ではなく、
+              同じ題材で組める現実的な構成のひとつです。
+            </p>
+            <ReferenceView challenge={challenge} components={components} />
+          </>
+        )}
       </div>
     </div>
   );

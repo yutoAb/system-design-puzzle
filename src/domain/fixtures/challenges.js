@@ -88,7 +88,33 @@ export const videoStreamingChallenge = {
     scalability: 1,
     cost: 1,
     requirements: 1
-  }
+  },
+  referenceLayout: {
+    "rate-limiter":        { x:   0, y:  80 },
+    "load-balancer":       { x: 220, y:  80 },
+    "application-service": { x: 440, y:  80 },
+    "cache":               { x: 660, y:   0 },
+    "consistent-hash":     { x: 660, y: 160 },
+    "key-value-store":     { x: 880, y:  80 },
+    "db-replica":          { x: 880, y: 240 },
+    "object-storage":      { x: 660, y: 320 },
+    "cdn":                 { x: 440, y: 320 },
+    "queue":               { x: 440, y: 480 },
+    "analytics-pipeline":  { x: 660, y: 480 }
+  },
+  referenceConnections: [
+    ["rate-limiter", "load-balancer"],
+    ["load-balancer", "application-service"],
+    ["application-service", "cache"],
+    ["application-service", "consistent-hash"],
+    ["cache", "key-value-store"],
+    ["consistent-hash", "key-value-store"],
+    ["application-service", "db-replica"],
+    ["application-service", "object-storage"],
+    ["cdn", "object-storage"],
+    ["application-service", "queue"],
+    ["queue", "analytics-pipeline"]
+  ]
 };
 
 export const chatServiceChallenge = {
@@ -174,7 +200,28 @@ export const chatServiceChallenge = {
     scalability: 1,
     cost: 1,
     requirements: 1
-  }
+  },
+  referenceLayout: {
+    "rate-limiter":        { x:   0, y: 160 },
+    "load-balancer":       { x: 220, y: 160 },
+    "websocket-gateway":   { x: 440, y: 160 },
+    "application-service": { x: 660, y: 160 },
+    "pubsub":              { x: 880, y:   0 },
+    "cache":               { x: 880, y: 120 },
+    "key-value-store":     { x: 880, y: 240 },
+    "relational-database": { x: 880, y: 360 },
+    "queue":               { x: 880, y: 480 }
+  },
+  referenceConnections: [
+    ["rate-limiter", "load-balancer"],
+    ["load-balancer", "websocket-gateway"],
+    ["websocket-gateway", "application-service"],
+    ["application-service", "pubsub"],
+    ["application-service", "cache"],
+    ["application-service", "key-value-store"],
+    ["application-service", "relational-database"],
+    ["application-service", "queue"]
+  ]
 };
 
 export const socialFeedChallenge = {
@@ -266,7 +313,31 @@ export const socialFeedChallenge = {
     scalability: 1,
     cost: 1,
     requirements: 1
-  }
+  },
+  referenceLayout: {
+    "rate-limiter":        { x:   0, y: 200 },
+    "load-balancer":       { x: 220, y: 200 },
+    "application-service": { x: 440, y: 200 },
+    "relational-database": { x: 660, y:  60 },
+    "db-replica":          { x: 880, y:  60 },
+    "cache":               { x: 660, y: 200 },
+    "key-value-store":     { x: 880, y: 320 },
+    "queue":               { x: 660, y: 340 },
+    "fanout-worker":       { x: 660, y: 480 },
+    "analytics-pipeline":  { x: 440, y: 480 }
+  },
+  referenceConnections: [
+    ["rate-limiter", "load-balancer"],
+    ["load-balancer", "application-service"],
+    ["application-service", "relational-database"],
+    ["application-service", "db-replica"],
+    ["application-service", "cache"],
+    ["application-service", "queue"],
+    ["queue", "fanout-worker"],
+    ["fanout-worker", "cache"],
+    ["fanout-worker", "key-value-store"],
+    ["application-service", "analytics-pipeline"]
+  ]
 };
 
 export const challenges = [

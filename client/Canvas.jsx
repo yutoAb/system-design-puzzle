@@ -2,43 +2,14 @@ import { useCallback, useMemo, useRef } from "react";
 import {
   Background,
   Controls,
-  Handle,
   MiniMap,
-  Position,
   ReactFlow,
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
   useReactFlow
 } from "@xyflow/react";
-import { ComponentIcon } from "./icons.jsx";
-
-function ComponentNode({ data }) {
-  return (
-    <div className={`canvas-node stage-${data.stageKey}`}>
-      <Handle type="target" position={Position.Left} />
-      <div className="canvas-node-icon">
-        <ComponentIcon componentId={data.componentId} size={48} />
-      </div>
-      <div className="canvas-node-label">
-        <strong>{data.name}</strong>
-        <small>{data.stage}</small>
-      </div>
-      <Handle type="source" position={Position.Right} />
-    </div>
-  );
-}
-
-const nodeTypes = { component: ComponentNode };
-
-const stageKeyMap = {
-  エッジ: "edge",
-  流量制御: "control",
-  サービス: "service",
-  保存: "storage",
-  非同期: "async",
-  データ分散: "partition"
-};
+import { nodeTypes, stageKeyMap } from "./ComponentNode.jsx";
 
 export function Canvas({
   nodes,
