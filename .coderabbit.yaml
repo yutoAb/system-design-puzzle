@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "ja-JP"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+  path_filters:
+    - "!dist/**"
+    - "!node_modules/**"
+    - "!package-lock.json"
+    - "!.vercel/**"
+  path_instructions:
+    - path: "src/domain/**"
+      instructions: "ドメイン層はフレームワーク非依存のため、外部依存を持ち込んでいないか確認してください。採点ロジックは決定的（同じ入力で同じ出力）であるべきです。"
+    - path: "client/**"
+      instructions: "React + Vite + React Flow を使った UI 層です。ドメイン層に直接依存せず、API 経由で通信していることを確認してください。"
+    - path: "test/**"
+      instructions: "Node 標準の test runner を使用しています。describe/it ではなく test() 関数で記述してください。"
+chat:
+  auto_reply: true
