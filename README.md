@@ -52,3 +52,11 @@ npm run preview   # 本番ビルドをローカル確認 → http://localhost:41
 
 仕様は `docs/specification.md` に記載します。
 参考にした公開ページは `docs/references.md` に記載します。
+
+## コントリビュート
+
+機能追加や修正は PR 経由でお願いします。`main` への直 push は避け、ブランチを切って PR を出してください。
+
+- PR を作成すると、CodeRabbit が日本語で自動レビューします
+- レビュー方針は `.coderabbit.yaml` を参照
+- ローカルで `npm test` が通ることを確認してから push してください
