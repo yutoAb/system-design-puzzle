@@ -25,11 +25,11 @@
 ## 開発
 
 ```bash
-npm test
-npm start
+npm install
+npm test          # ドメイン層のテスト (Node 標準 test runner)
+npm run dev       # API + Vite 開発サーバを並行起動 → http://localhost:5173
+npm run preview   # 本番ビルドをローカル確認 → http://localhost:4173
 ```
-
-`npm start` の後、ブラウザで `http://localhost:4173` を開きます。
 
 ## 遊び方
 
@@ -47,7 +47,8 @@ npm start
 - `src/application`: ユースケース
 - `src/infrastructure`: インメモリリポジトリ
 - `src/interface-adapters`: コントローラ
-- `public`: ブラウザUI
+- `client`: React + Vite + React Flow のブラウザ UI
+- `api`: Vercel Functions エントリポイント
 
 仕様は `docs/specification.md` に記載します。
 参考にした公開ページは `docs/references.md` に記載します。

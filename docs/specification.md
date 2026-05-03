@@ -78,7 +78,8 @@
 - `application`: ユースケース。
 - `infrastructure`: インメモリリポジトリなどの外部実装。
 - `interface-adapters`: UIやサーバーとユースケースの変換層。
-- `public`: ブラウザUI。
+- `client`: React + Vite + React Flow のブラウザUI。
+- `api`: Vercel Functions エントリポイント。
 
 ドメイン層はUI、サーバー、保存方式に依存しません。
 
