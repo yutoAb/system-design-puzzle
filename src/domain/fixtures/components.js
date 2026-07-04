@@ -1,5 +1,18 @@
 export const componentCatalog = [
   {
+    id: "client",
+    name: "クライアント",
+    stage: "クライアント",
+    description: "Webブラウザやモバイルアプリなど、システムを利用するユーザー側の起点です。",
+    concepts: ["クライアント"],
+    effects: {
+      availability: 0,
+      latency: 0,
+      scalability: 0,
+      cost: 0
+    }
+  },
+  {
     id: "cdn",
     name: "CDN",
     stage: "エッジ",

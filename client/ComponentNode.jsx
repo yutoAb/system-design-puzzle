@@ -2,6 +2,7 @@ import { Handle, Position } from "@xyflow/react";
 import { ComponentIcon } from "./icons.jsx";
 
 export const stageKeyMap = {
+  クライアント: "client",
   エッジ: "edge",
   流量制御: "control",
   サービス: "service",

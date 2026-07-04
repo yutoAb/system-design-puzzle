@@ -1,7 +1,32 @@
 export function applyRealtimeEvent(transcript, event, phase) {
   switch (event?.type) {
+    // ユーザー発話の文字起こしは応答より遅れて完了するため、
+    // アイテム生成イベントの時点で空のプレースホルダーを確保して会話順を保つ
+    case "conversation.item.added":
+    case "conversation.item.created": {
+      const item = event.item;
+      if (item?.type !== "message" || item.role !== "user") {
+        return transcript;
+      }
+      if (transcript.some((entry) => entry.id === item.id)) {
+        return transcript;
+      }
+      return [
+        ...transcript,
+        { id: item.id, role: "user", text: "", phase, final: false }
+      ];
+    }
     case "conversation.item.input_audio_transcription.completed": {
       const text = (event.transcript ?? "").trim();
+      const existing = transcript.find((entry) => entry.id === event.item_id);
+      if (existing) {
+        if (text === "") {
+          return transcript.filter((entry) => entry.id !== event.item_id);
+        }
+        return transcript.map((entry) =>
+          entry.id === event.item_id ? { ...entry, text, final: true } : entry
+        );
+      }
       if (text === "") return transcript;
       return [
         ...transcript,
