@@ -3,11 +3,11 @@ import { readFile } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createGameController } from "./interface-adapters/gameController.js";
+import { createInterviewController } from "./interface-adapters/interviewController.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const distDir = join(__dirname, "..", "dist");
-const gameController = createGameController();
+const interviewController = createInterviewController();
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -20,12 +20,38 @@ const contentTypes = {
 const server = createServer(async (request, response) => {
   try {
     if (request.url === "/api/initial-state" && request.method === "GET") {
-      return sendJson(response, 200, gameController.initialState());
+      return sendJson(response, 200, interviewController.initialState());
     }
 
     if (request.url === "/api/submit-design" && request.method === "POST") {
       const body = await readJsonBody(request);
-      return sendJson(response, 200, gameController.submitDesign(body));
+      return sendJson(response, 200, interviewController.submitDesign(body));
+    }
+
+    if (request.url === "/api/realtime-session" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      try {
+        const result = await interviewController.createInterviewSession(body);
+        return sendJson(response, 200, result);
+      } catch (error) {
+        const status = /unknown challenge/.test(error.message) ? 400 : 502;
+        return sendJson(response, status, { error: error.message });
+      }
+    }
+
+    if (request.url === "/api/evaluate-interview" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      try {
+        const result = await interviewController.evaluateInterview(body);
+        return sendJson(response, 200, result);
+      } catch (error) {
+        const status = /unknown challenge|transcript is required/.test(
+          error.message
+        )
+          ? 400
+          : 502;
+        return sendJson(response, status, { error: error.message });
+      }
     }
 
     const urlPath = request.url === "/" ? "/index.html" : request.url;

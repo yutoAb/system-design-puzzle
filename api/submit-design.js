@@ -1,6 +1,6 @@
-import { createGameController } from "../src/interface-adapters/gameController.js";
+import { createInterviewController } from "../src/interface-adapters/interviewController.js";
 
-const gameController = createGameController();
+const interviewController = createInterviewController();
 
 export default function handler(request, response) {
   if (request.method !== "POST") {
@@ -8,7 +8,7 @@ export default function handler(request, response) {
     return;
   }
   try {
-    response.status(200).json(gameController.submitDesign(request.body ?? {}));
+    response.status(200).json(interviewController.submitDesign(request.body ?? {}));
   } catch (error) {
     response.status(400).json({ error: error.message });
   }
