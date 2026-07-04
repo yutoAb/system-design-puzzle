@@ -83,6 +83,7 @@ export const videoStreamingChallenge = {
     "各ピースを足す、または省くときに受け入れたトレードオフを説明する。"
   ],
   referenceLayout: {
+    "client":              { x: -220, y: 200 },
     "rate-limiter":        { x:   0, y:  80 },
     "load-balancer":       { x: 220, y:  80 },
     "application-service": { x: 440, y:  80 },
@@ -96,6 +97,8 @@ export const videoStreamingChallenge = {
     "analytics-pipeline":  { x: 660, y: 480 }
   },
   referenceConnections: [
+    ["client", "rate-limiter"],
+    ["client", "cdn"],
     ["rate-limiter", "load-balancer"],
     ["load-balancer", "application-service"],
     ["application-service", "cache"],
@@ -188,6 +191,7 @@ export const chatServiceChallenge = {
     "接続が特定サーバーに偏ったときの対処を言語化する。"
   ],
   referenceLayout: {
+    "client":              { x: -220, y: 160 },
     "rate-limiter":        { x:   0, y: 160 },
     "load-balancer":       { x: 220, y: 160 },
     "websocket-gateway":   { x: 440, y: 160 },
@@ -199,6 +203,7 @@ export const chatServiceChallenge = {
     "queue":               { x: 880, y: 480 }
   },
   referenceConnections: [
+    ["client", "rate-limiter"],
     ["rate-limiter", "load-balancer"],
     ["load-balancer", "websocket-gateway"],
     ["websocket-gateway", "application-service"],
@@ -294,6 +299,7 @@ export const socialFeedChallenge = {
     "書き込み/読み込み比を前提に、どこをスケールさせるか選ぶ。"
   ],
   referenceLayout: {
+    "client":              { x: -220, y: 200 },
     "rate-limiter":        { x:   0, y: 200 },
     "load-balancer":       { x: 220, y: 200 },
     "application-service": { x: 440, y: 200 },
@@ -306,6 +312,7 @@ export const socialFeedChallenge = {
     "analytics-pipeline":  { x: 440, y: 480 }
   },
   referenceConnections: [
+    ["client", "rate-limiter"],
     ["rate-limiter", "load-balancer"],
     ["load-balancer", "application-service"],
     ["application-service", "relational-database"],

@@ -273,7 +273,40 @@ function AnalyticsPipelineIcon() {
   );
 }
 
+function ClientIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <rect
+        x="6"
+        y="12"
+        width="36"
+        height="26"
+        rx="3"
+        fill="#3b7fc1"
+        stroke="#1a5590"
+        strokeWidth="1.5"
+      />
+      <rect x="10" y="16" width="28" height="18" fill="#ffffff" />
+      <rect x="18" y="40" width="12" height="4" fill="#1a5590" />
+      <rect x="12" y="44" width="24" height="4" rx="2" fill="#1a5590" />
+      <rect
+        x="42"
+        y="20"
+        width="16"
+        height="30"
+        rx="3"
+        fill="#3b7fc1"
+        stroke="#1a5590"
+        strokeWidth="1.5"
+      />
+      <rect x="45" y="24" width="10" height="18" fill="#ffffff" />
+      <circle cx="50" cy="46" r="2" fill="#ffffff" />
+    </svg>
+  );
+}
+
 export const componentIcons = {
+  client: ClientIcon,
   cdn: CdnIcon,
   "load-balancer": LoadBalancerIcon,
   "application-service": ServerRackIcon,

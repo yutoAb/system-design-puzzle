@@ -19,7 +19,13 @@ export function TranscriptPanel({ transcript }) {
             <span className="transcript-speaker">
               {entry.role === "assistant" ? "面接官" : "あなた"}
             </span>
-            <p>{entry.text}</p>
+            <p>
+              {entry.text !== "" ? (
+                entry.text
+              ) : (
+                <em className="transcribing">（聞き取り中…）</em>
+              )}
+            </p>
           </div>
         ))}
         <div ref={bottomRef} />
