@@ -23,11 +23,6 @@ const server = createServer(async (request, response) => {
       return sendJson(response, 200, interviewController.initialState());
     }
 
-    if (request.url === "/api/submit-design" && request.method === "POST") {
-      const body = await readJsonBody(request);
-      return sendJson(response, 200, interviewController.submitDesign(body));
-    }
-
     if (request.url === "/api/realtime-session" && request.method === "POST") {
       const body = await readJsonBody(request);
       try {
@@ -87,7 +82,7 @@ const server = createServer(async (request, response) => {
 
 const port = Number(process.env.PORT ?? 4173);
 server.listen(port, () => {
-  console.log(`システム設計パズルを http://localhost:${port} で起動しました`);
+  console.log(`システム設計模擬面接を http://localhost:${port} で起動しました`);
 });
 
 function sendJson(response, statusCode, payload) {
