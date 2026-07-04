@@ -16,6 +16,10 @@ const STATUS_LABELS = {
   error: "エラー"
 };
 
+// コスト暴走防止の上限。超えたら自動で面接を終了して評価へ進む
+const MAX_SECONDS = { short: 20 * 60, full: 50 * 60 };
+const REMAINING_WARNING_SECONDS = 5 * 60;
+
 function formatElapsed(seconds) {
   const min = String(Math.floor(seconds / 60)).padStart(2, "0");
   const sec = String(seconds % 60).padStart(2, "0");
@@ -26,6 +30,7 @@ export function InterviewScreen({
   challenge,
   components,
   durationMode,
+  accessCode,
   mock,
   nodes,
   edges,
@@ -48,6 +53,8 @@ export function InterviewScreen({
 
   const [elapsed, setElapsed] = useState(0);
   const lastSnapshotRef = useRef("");
+  const maxSeconds = MAX_SECONDS[durationMode] ?? MAX_SECONDS.full;
+  const remaining = maxSeconds - elapsed;
 
   useEffect(() => {
     if (status !== "connected") {
@@ -56,6 +63,12 @@ export function InterviewScreen({
     const timer = setInterval(() => setElapsed((value) => value + 1), 1000);
     return () => clearInterval(timer);
   }, [status]);
+
+  useEffect(() => {
+    if (status === "connected" && remaining <= 0) {
+      endInterview();
+    }
+  }, [status, remaining, endInterview]);
 
   useEffect(() => {
     if (status !== "connected") {
@@ -93,14 +106,22 @@ export function InterviewScreen({
         <div className="interview-controls">
           <span className={`status-chip status-${status}`}>
             {STATUS_LABELS[status]}
-            {status === "connected" && ` ${formatElapsed(elapsed)}`}
+            {status === "connected" &&
+              (remaining <= REMAINING_WARNING_SECONDS
+                ? ` 残り${formatElapsed(Math.max(remaining, 0))}`
+                : ` ${formatElapsed(elapsed)}`)}
           </span>
           {status === "idle" || status === "error" ? (
             <button
               type="button"
               className="primary"
               onClick={() =>
-                connect({ challengeId: challenge.id, durationMode, mock })
+                connect({
+                  challengeId: challenge.id,
+                  durationMode,
+                  accessCode,
+                  mock
+                })
               }
             >
               マイクをオンにして面接開始

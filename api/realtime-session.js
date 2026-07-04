@@ -13,6 +13,10 @@ export default async function handler(request, response) {
     );
     response.status(200).json(result);
   } catch (error) {
+    if (/アクセスコード/.test(error.message)) {
+      response.status(401).json({ error: error.message });
+      return;
+    }
     if (/unknown challenge/.test(error.message)) {
       response.status(400).json({ error: error.message });
       return;
