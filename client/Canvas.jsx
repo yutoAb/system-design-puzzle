@@ -11,17 +11,7 @@ import {
 } from "@xyflow/react";
 import { nodeTypes, stageKeyMap } from "./ComponentNode.jsx";
 
-export function Canvas({
-  nodes,
-  edges,
-  setNodes,
-  setEdges,
-  components,
-  challenge,
-  placedCost,
-  onSubmit,
-  onReset
-}) {
+export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }) {
   const wrapperRef = useRef(null);
   const { screenToFlowPosition } = useReactFlow();
 
@@ -94,48 +84,22 @@ export function Canvas({
     [components, nodes, screenToFlowPosition, setNodes]
   );
 
-  const requiredEdgeKeys = useMemo(() => {
-    if (!challenge?.requiredConnections) {
-      return new Set();
-    }
-    return new Set(
-      challenge.requiredConnections.map(([a, b]) => (a < b ? `${a}|${b}` : `${b}|${a}`))
-    );
-  }, [challenge]);
-
   const styledEdges = useMemo(
     () =>
-      edges.map((edge) => {
-        const key =
-          edge.source < edge.target
-            ? `${edge.source}|${edge.target}`
-            : `${edge.target}|${edge.source}`;
-        const isRequired = requiredEdgeKeys.has(key);
-        return {
-          ...edge,
-          animated: isRequired,
-          style: {
-            stroke: isRequired ? "#1e7a4d" : "#1a5590",
-            strokeWidth: 2
-          }
-        };
-      }),
-    [edges, requiredEdgeKeys]
+      edges.map((edge) => ({
+        ...edge,
+        style: { stroke: "#1a5590", strokeWidth: 2 }
+      })),
+    [edges]
   );
-
-  const budget = challenge?.architectureBudget ?? 0;
 
   return (
     <div className="canvas-wrap" ref={wrapperRef}>
       <div className="board-overlay">
-        <div className="budget">
-          <span>アーキテクチャ予算</span>
-          <strong>{placedCost}/{budget}</strong>
-          <meter min={0} max={budget || 100} value={Math.min(placedCost, budget || 100)} />
-        </div>
         <div className="actions">
-          <button type="button" className="primary" onClick={onSubmit}>採点する</button>
-          <button type="button" className="secondary-button" onClick={onReset}>配置を戻す</button>
+          <button type="button" className="secondary-button" onClick={onReset}>
+            配置を戻す
+          </button>
         </div>
       </div>
       <div className="canvas" onDragOver={onDragOver} onDrop={onDrop}>
