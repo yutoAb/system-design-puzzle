@@ -82,13 +82,6 @@ export const videoStreamingChallenge = {
     "ホットな読み取り経路を見積もり、ボトルネックを取り除く。",
     "各ピースを足す、または省くときに受け入れたトレードオフを説明する。"
   ],
-  scoringWeights: {
-    availability: 1,
-    latency: 1,
-    scalability: 1,
-    cost: 1,
-    requirements: 1
-  },
   referenceLayout: {
     "rate-limiter":        { x:   0, y:  80 },
     "load-balancer":       { x: 220, y:  80 },
@@ -194,13 +187,6 @@ export const chatServiceChallenge = {
     "1対1と大人数チャットで配信方式がどう変わるかを説明する。",
     "接続が特定サーバーに偏ったときの対処を言語化する。"
   ],
-  scoringWeights: {
-    availability: 1,
-    latency: 1,
-    scalability: 1,
-    cost: 1,
-    requirements: 1
-  },
   referenceLayout: {
     "rate-limiter":        { x:   0, y: 160 },
     "load-balancer":       { x: 220, y: 160 },
@@ -307,13 +293,6 @@ export const socialFeedChallenge = {
     "ホットユーザー（フォロワー数が極端に多い）への対処を設計する。",
     "書き込み/読み込み比を前提に、どこをスケールさせるか選ぶ。"
   ],
-  scoringWeights: {
-    availability: 1,
-    latency: 1,
-    scalability: 1,
-    cost: 1,
-    requirements: 1
-  },
   referenceLayout: {
     "rate-limiter":        { x:   0, y: 200 },
     "load-balancer":       { x: 220, y: 200 },

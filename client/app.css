@@ -36,10 +36,6 @@ button.secondary-button {
   color: #29322d;
 }
 
-.layout {
-  min-height: 100vh;
-}
-
 .intro {
   background: #d7ece4;
   border-bottom: 1px solid #9db8ad;
@@ -64,49 +60,6 @@ h1 {
   font-size: 1.05rem;
   line-height: 1.6;
   max-width: 760px;
-}
-
-.challenge-switch {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  margin: 16px 0 20px;
-}
-
-.challenge-switch label {
-  color: #516159;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.challenge-switch select {
-  background: #ffffff;
-  border: 2px solid #29322d;
-  border-radius: 6px;
-  font: inherit;
-  font-weight: 700;
-  min-height: 40px;
-  padding: 4px 10px;
-}
-
-.howto {
-  counter-reset: howto;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  list-style: none;
-  margin: 0 0 24px;
-  padding: 0;
-}
-
-.howto li {
-  background: #ffffff;
-  border: 1px solid #29322d;
-  border-radius: 6px;
-  box-shadow: 4px 4px 0 #29322d;
-  line-height: 1.5;
-  padding: 12px 14px;
 }
 
 .requirements {
@@ -142,27 +95,6 @@ h1 {
 .board-overlay .actions {
   display: flex;
   gap: 8px;
-}
-
-.board-overlay .actions button.primary {
-  background: #1e7a4d;
-}
-
-.budget {
-  align-items: center;
-  background: #ffffff;
-  border: 1px solid #29322d;
-  border-radius: 6px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr auto;
-  padding: 12px;
-}
-
-.budget meter {
-  grid-column: 1 / -1;
-  height: 14px;
-  width: 100%;
 }
 
 .canvas {
@@ -237,8 +169,7 @@ h1 {
   padding-left: 24px;
 }
 
-.panel-copy,
-.score-copy {
+.panel-copy {
   color: #516159;
   line-height: 1.5;
 }
@@ -267,10 +198,6 @@ h1 {
 .component-option:hover {
   box-shadow: 3px 3px 0 #29322d;
   transform: translate(-1px, -1px);
-}
-
-.component-option.required {
-  border-color: #1e7a4d;
 }
 
 .component-option.placed {
@@ -322,96 +249,6 @@ h1 {
   grid-column: 1 / -1;
   justify-self: start;
   padding: 2px 8px;
-}
-
-.result {
-  padding: 24px 32px 48px;
-}
-
-.scoreboard {
-  background: #ffffff;
-  border: 2px solid #29322d;
-  border-radius: 6px;
-  display: grid;
-  gap: 18px;
-  padding: 24px;
-}
-
-.scoreboard h2 {
-  font-size: 2rem;
-}
-
-.metrics {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-}
-
-.metrics > div {
-  background: #f7f8f4;
-  border: 1px solid #9db8ad;
-  border-radius: 6px;
-  display: grid;
-  gap: 2px;
-  padding: 10px;
-  text-align: center;
-}
-
-.metrics strong {
-  font-size: 1.8rem;
-}
-
-.metrics span {
-  color: #516159;
-  font-size: 0.8rem;
-}
-
-.connection-coverage {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.connection-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.connection-list li {
-  border-bottom: 1px dashed #c6d4cd;
-  padding: 4px 0;
-}
-
-.connection-list.matched li {
-  color: #1e7a4d;
-}
-
-.connection-list.missing li {
-  color: #e94f37;
-}
-
-.connection-list .empty {
-  color: #65736b;
-}
-
-.feedback {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.interview-notes {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.interview-notes article {
-  background: #f7f8f4;
-  border: 1px solid #9db8ad;
-  border-radius: 6px;
-  padding: 12px;
 }
 
 .reference-toggle {

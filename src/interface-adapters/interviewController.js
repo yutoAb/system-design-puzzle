@@ -2,7 +2,6 @@ import { createCreateInterviewSession } from "../application/createInterviewSess
 import { createEvaluateInterview, DEFAULT_EVAL_MODEL } from "../application/evaluateInterview.js";
 import { createListChallenges } from "../application/listChallenges.js";
 import { createListComponents } from "../application/listComponents.js";
-import { createSubmitDesign } from "../application/submitDesign.js";
 import { createInMemoryChallengeRepository } from "../infrastructure/inMemoryChallengeRepository.js";
 import { createInMemoryComponentRepository } from "../infrastructure/inMemoryComponentRepository.js";
 import { createOpenAiClient } from "../infrastructure/openAiClient.js";
@@ -17,7 +16,6 @@ export function createInterviewController() {
 
   const listChallenges = createListChallenges({ challengeRepository });
   const listComponents = createListComponents({ componentRepository });
-  const submitDesign = createSubmitDesign({ challengeRepository });
   const createInterviewSession = createCreateInterviewSession({
     challengeRepository,
     componentRepository,
@@ -36,9 +34,6 @@ export function createInterviewController() {
         challenges: listChallenges(),
         components: listComponents()
       };
-    },
-    submitDesign(requestBody) {
-      return submitDesign(requestBody);
     },
     createInterviewSession(requestBody) {
       return createInterviewSession(requestBody ?? {});
