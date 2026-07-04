@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ReactFlowProvider } from "@xyflow/react";
-import { Canvas } from "./Canvas.jsx";
-import { Palette } from "./Palette.jsx";
-import { Requirements } from "./Requirements.jsx";
-import { Scoreboard } from "./Scoreboard.jsx";
+import { ChallengeSelect } from "./ChallengeSelect.jsx";
+import { InterviewScreen } from "./InterviewScreen.jsx";
+import { ReportScreen } from "./ReportScreen.jsx";
+
+const isMockMode = new URLSearchParams(window.location.search).has("mock");
 
 export function App() {
+  const [screen, setScreen] = useState("select"); // select | interview | report
   const [challenges, setChallenges] = useState([]);
   const [components, setComponents] = useState([]);
   const [activeChallengeId, setActiveChallengeId] = useState(undefined);
+  const [durationMode, setDurationMode] = useState("short");
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [result, setResult] = useState(undefined);
+  const [report, setReport] = useState(null);
+  const [reportError, setReportError] = useState(null);
 
   useEffect(() => {
     fetch("/api/initial-state")
@@ -19,7 +22,6 @@ export function App() {
       .then((data) => {
         setChallenges(data.challenges);
         setComponents(data.components);
-        setActiveChallengeId(data.challenges[0]?.id);
       });
   }, []);
 
@@ -28,121 +30,97 @@ export function App() {
     [challenges, activeChallengeId]
   );
 
-  const componentById = useCallback(
-    (componentId) => components.find((component) => component.id === componentId),
-    [components]
-  );
-
-  const resetBoard = useCallback(() => {
+  const handleStart = useCallback((challengeId, mode) => {
+    setActiveChallengeId(challengeId);
+    setDurationMode(mode);
     setNodes([]);
     setEdges([]);
-    setResult(undefined);
+    setReport(null);
+    setReportError(null);
+    setScreen("interview");
   }, []);
 
-  const handleChangeChallenge = useCallback((event) => {
-    setActiveChallengeId(event.target.value);
-    setNodes([]);
-    setEdges([]);
-    setResult(undefined);
-  }, []);
-
-  const handleSubmit = useCallback(async () => {
-    const selectedComponentIds = [...new Set(nodes.map((node) => node.data.componentId))];
-    const connections = edges.map((edge) => [edge.source, edge.target]);
-    const response = await fetch("/api/submit-design", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        challengeId: activeChallengeId,
-        selectedComponentIds,
-        connections
-      })
-    });
-    const data = await response.json();
-    setResult(data);
-  }, [activeChallengeId, edges, nodes]);
-
-  const placedCost = useMemo(
-    () =>
-      nodes.reduce((total, node) => {
-        const component = componentById(node.data.componentId);
-        return total + (component?.effects.cost ?? 0);
-      }, 0),
-    [nodes, componentById]
+  const handleFinished = useCallback(
+    async (transcript) => {
+      setScreen("report");
+      const spokenEntries = transcript.filter(
+        (entry) => entry.text.trim() !== ""
+      );
+      if (spokenEntries.length === 0) {
+        setReportError("評価できる会話がありませんでした");
+        return;
+      }
+      try {
+        const response = await fetch("/api/evaluate-interview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            challengeId: activeChallengeId,
+            durationMode,
+            transcript: spokenEntries.map(({ role, text, phase }) => ({
+              role,
+              text,
+              phase
+            })),
+            board: {
+              componentIds: [
+                ...new Set(nodes.map((node) => node.data.componentId))
+              ],
+              connections: edges.map((edge) => [edge.source, edge.target])
+            }
+          })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error ?? `評価に失敗しました (${response.status})`);
+        }
+        setReport(data);
+      } catch (error) {
+        setReportError(error.message);
+      }
+    },
+    [activeChallengeId, durationMode, nodes, edges]
   );
 
-  if (!activeChallenge) {
+  const handleRestart = useCallback(() => {
+    setScreen("select");
+    setNodes([]);
+    setEdges([]);
+    setReport(null);
+    setReportError(null);
+  }, []);
+
+  if (challenges.length === 0) {
     return <p style={{ padding: 32 }}>読み込み中…</p>;
   }
 
-  return (
-    <div className="layout">
-      <header className="intro">
-        <p className="eyebrow">システム設計パズル</p>
-        <h1>{activeChallenge.title}</h1>
-        <p className="prompt">{activeChallenge.prompt}</p>
+  if (screen === "interview" && activeChallenge) {
+    return (
+      <InterviewScreen
+        challenge={activeChallenge}
+        components={components}
+        durationMode={durationMode}
+        mock={isMockMode}
+        nodes={nodes}
+        edges={edges}
+        setNodes={setNodes}
+        setEdges={setEdges}
+        onFinished={handleFinished}
+      />
+    );
+  }
 
-        <div className="challenge-switch">
-          <label htmlFor="challengeSelect">お題</label>
-          <select
-            id="challengeSelect"
-            value={activeChallengeId}
-            onChange={handleChangeChallenge}
-          >
-            {challenges.map((challenge) => (
-              <option key={challenge.id} value={challenge.id}>
-                {challenge.title}
-              </option>
-            ))}
-          </select>
-        </div>
+  if (screen === "report" && activeChallenge) {
+    return (
+      <ReportScreen
+        report={report}
+        error={reportError}
+        challenge={activeChallenge}
+        components={components}
+        onRestart={handleRestart}
+      />
+    );
+  }
 
-        <ol className="howto">
-          <li>
-            <strong>1. ピースを置く</strong>：右のパレットから白キャンバスへドラッグ。
-          </li>
-          <li>
-            <strong>2. 接続する</strong>：ピースの端のハンドルをドラッグして、別のピースへ線を引く。
-          </li>
-          <li>
-            <strong>3. 採点する</strong>：必要な接続が揃うとスコアが上がる。
-          </li>
-        </ol>
-
-        <Requirements challenge={activeChallenge} />
-      </header>
-
-      <main className="workspace">
-        <ReactFlowProvider>
-          <Canvas
-            nodes={nodes}
-            edges={edges}
-            setNodes={setNodes}
-            setEdges={setEdges}
-            components={components}
-            challenge={activeChallenge}
-            placedCost={placedCost}
-            onSubmit={handleSubmit}
-            onReset={resetBoard}
-          />
-          <Palette
-            components={components}
-            challenge={activeChallenge}
-            placedComponentIds={new Set(nodes.map((node) => node.data.componentId))}
-          />
-        </ReactFlowProvider>
-      </main>
-
-      {result && (
-        <section className="result" aria-live="polite">
-          <Scoreboard
-            result={result}
-            componentById={componentById}
-            challenge={activeChallenge}
-            components={components}
-          />
-        </section>
-      )}
-    </div>
-  );
+  return <ChallengeSelect challenges={challenges} onStart={handleStart} />;
 }

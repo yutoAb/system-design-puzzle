@@ -17,14 +17,6 @@ export function Requirements({ challenge }) {
           ))}
         </ul>
       </div>
-      <div>
-        <h2>面接メモ</h2>
-        <ul>
-          {challenge.interviewPrompts.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }
