@@ -6,6 +6,8 @@ import { createInMemoryChallengeRepository } from "../infrastructure/inMemoryCha
 import { createInMemoryComponentRepository } from "../infrastructure/inMemoryComponentRepository.js";
 import { createOpenAiClient } from "../infrastructure/openAiClient.js";
 
+export const ACCESS_CODE_ERROR = "アクセスコードが正しくありません";
+
 export function createInterviewController() {
   const challengeRepository = createInMemoryChallengeRepository();
   const componentRepository = createInMemoryComponentRepository();
@@ -13,6 +15,17 @@ export function createInterviewController() {
     apiKey: process.env.OPENAI_API_KEY,
     mock: process.env.MOCK_OPENAI === "1"
   });
+  const accessCode = process.env.ACCESS_CODE;
+
+  // OpenAI を呼ぶ（= 課金が発生する）エンドポイントだけを招待コードで守る
+  function assertAccessCode(requestBody) {
+    if (!accessCode) {
+      return;
+    }
+    if (requestBody?.accessCode !== accessCode) {
+      throw new Error(ACCESS_CODE_ERROR);
+    }
+  }
 
   const listChallenges = createListChallenges({ challengeRepository });
   const listComponents = createListComponents({ componentRepository });
@@ -35,10 +48,12 @@ export function createInterviewController() {
         components: listComponents()
       };
     },
-    createInterviewSession(requestBody) {
+    async createInterviewSession(requestBody) {
+      assertAccessCode(requestBody);
       return createInterviewSession(requestBody ?? {});
     },
-    evaluateInterview(requestBody) {
+    async evaluateInterview(requestBody) {
+      assertAccessCode(requestBody);
       return evaluateInterview(requestBody ?? {});
     }
   };

@@ -29,7 +29,11 @@ const server = createServer(async (request, response) => {
         const result = await interviewController.createInterviewSession(body);
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /unknown challenge/.test(error.message) ? 400 : 502;
+        const status = /アクセスコード/.test(error.message)
+          ? 401
+          : /unknown challenge/.test(error.message)
+            ? 400
+            : 502;
         return sendJson(response, status, { error: error.message });
       }
     }
@@ -40,11 +44,11 @@ const server = createServer(async (request, response) => {
         const result = await interviewController.evaluateInterview(body);
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /unknown challenge|transcript is required/.test(
-          error.message
-        )
-          ? 400
-          : 502;
+        const status = /アクセスコード/.test(error.message)
+          ? 401
+          : /unknown challenge|transcript is required/.test(error.message)
+            ? 400
+            : 502;
         return sendJson(response, status, { error: error.message });
       }
     }

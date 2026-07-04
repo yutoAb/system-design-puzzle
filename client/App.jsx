@@ -15,6 +15,14 @@ export function App() {
   const [edges, setEdges] = useState([]);
   const [report, setReport] = useState(null);
   const [reportError, setReportError] = useState(null);
+  const [accessCode, setAccessCode] = useState(
+    () => window.localStorage.getItem("interview-access-code") ?? ""
+  );
+
+  const handleAccessCodeChange = useCallback((value) => {
+    setAccessCode(value);
+    window.localStorage.setItem("interview-access-code", value);
+  }, []);
 
   useEffect(() => {
     fetch("/api/initial-state")
@@ -56,6 +64,7 @@ export function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             challengeId: activeChallengeId,
+            accessCode,
             durationMode,
             transcript: spokenEntries.map(({ role, text, phase }) => ({
               role,
@@ -79,7 +88,7 @@ export function App() {
         setReportError(error.message);
       }
     },
-    [activeChallengeId, durationMode, nodes, edges]
+    [activeChallengeId, durationMode, nodes, edges, accessCode]
   );
 
   const handleRestart = useCallback(() => {
@@ -100,6 +109,7 @@ export function App() {
         challenge={activeChallenge}
         components={components}
         durationMode={durationMode}
+        accessCode={accessCode}
         mock={isMockMode}
         nodes={nodes}
         edges={edges}
@@ -122,5 +132,12 @@ export function App() {
     );
   }
 
-  return <ChallengeSelect challenges={challenges} onStart={handleStart} />;
+  return (
+    <ChallengeSelect
+      challenges={challenges}
+      accessCode={accessCode}
+      onAccessCodeChange={handleAccessCodeChange}
+      onStart={handleStart}
+    />
+  );
 }

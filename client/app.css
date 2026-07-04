@@ -674,3 +674,27 @@ button.danger-button {
 .report-reference .reference-canvas {
   height: 420px;
 }
+
+.access-code {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  max-width: 320px;
+}
+
+.access-code label {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.access-code input {
+  border: 2px solid #29322d;
+  border-radius: 6px;
+  font: inherit;
+  padding: 8px 12px;
+}
+
+.access-code small {
+  opacity: 0.7;
+}
