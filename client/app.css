@@ -97,6 +97,17 @@ h1 {
   gap: 8px;
 }
 
+.board-hint {
+  color: #5c6660;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* インライン style の stroke より優先させるため !important */
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: #c0392b !important;
+}
+
 .canvas {
   background: #ffffff;
   border: 2px solid #29322d;
