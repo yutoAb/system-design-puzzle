@@ -43,8 +43,9 @@ const SCRIPT = [
   [15500, userSpeech("m7", "キャッシュとDBレプリカで読み取りをスケールさせます。")],
   [17000, functionCall("advance_phase", { phase: "wrap_up" })],
   [18500, assistantSpeech("m8", "本日はありがとうございました。全体像の説明が明快でした。以上で面接を終了します。")],
+  [18600, { type: "output_audio_buffer.started" }],
   [20500, functionCall("end_interview", {})],
-  [21000, { type: "output_audio_buffer.stopped" }]
+  [23000, { type: "output_audio_buffer.stopped" }]
 ];
 
 export function createMockRealtimeDriver() {
