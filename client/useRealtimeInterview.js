@@ -3,7 +3,12 @@ import { applyRealtimeEvent } from "../src/domain/interview/transcript.js";
 import { createMockRealtimeDriver } from "./mockRealtimeDriver.js";
 
 const OPENAI_CALLS_URL = "https://api.openai.com/v1/realtime/calls";
-const END_GRACE_MS = 10000;
+// end_interview 後の終了タイミング制御:
+// response.done は音声の「生成完了」時に届き、実際の再生はそこからさらに続くため、
+// 再生終了イベント (output_audio_buffer.stopped) を一次シグナルとして待つ。
+const END_MAX_WAIT_MS = 90000; // 締めの音声がどれだけ長くても最終的に終了する保険
+const END_NO_AUDIO_MS = 5000; // 音声が再生されないまま終わるケースの待ち時間
+const END_TAIL_MS = 1000; // stopped 後、クライアント側の再生残りを待つ
 
 async function connectWebRtc({ clientSecret, model, onEvent, audioElement }) {
   const media = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -91,26 +96,45 @@ export function useRealtimeInterview({ onEnded }) {
   const transcriptRef = useRef([]);
   const audioRef = useRef(null);
   const endedRef = useRef(false);
-  const pendingEndTimerRef = useRef(null);
+  const pendingEndRef = useRef(false);
+  const audioPlayingRef = useRef(false);
+  const maxWaitTimerRef = useRef(null);
+  const noAudioTimerRef = useRef(null);
+  const tailTimerRef = useRef(null);
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
+
+  const clearEndTimers = useCallback(() => {
+    clearTimeout(maxWaitTimerRef.current);
+    clearTimeout(noAudioTimerRef.current);
+    clearTimeout(tailTimerRef.current);
+    maxWaitTimerRef.current = null;
+    noAudioTimerRef.current = null;
+    tailTimerRef.current = null;
+  }, []);
 
   const finish = useCallback(() => {
     if (endedRef.current) {
       return;
     }
     endedRef.current = true;
-    clearTimeout(pendingEndTimerRef.current);
+    clearEndTimers();
     driverRef.current?.disconnect();
     driverRef.current = null;
     setStatus("ended");
     onEndedRef.current?.(transcriptRef.current);
-  }, []);
+  }, [clearEndTimers]);
 
   const scheduleFinish = useCallback(() => {
-    // 締めの音声を言い終えるまで待つ。output_audio_buffer.stopped が来たら即終了。
-    if (!pendingEndTimerRef.current) {
-      pendingEndTimerRef.current = setTimeout(finish, END_GRACE_MS);
+    // 締めの音声を言い終えるまで待つ。output_audio_buffer.stopped が来たら終了。
+    if (pendingEndRef.current) {
+      return;
+    }
+    pendingEndRef.current = true;
+    maxWaitTimerRef.current = setTimeout(finish, END_MAX_WAIT_MS);
+    if (!audioPlayingRef.current) {
+      // すでに言い終えている（音声が再生中でない）場合の保険
+      noAudioTimerRef.current = setTimeout(finish, END_NO_AUDIO_MS);
     }
   }, [finish]);
 
@@ -120,11 +144,18 @@ export function useRealtimeInterview({ onEnded }) {
         console.error("[realtime] error event", event);
         return;
       }
-      if (
-        event.type === "output_audio_buffer.stopped" &&
-        pendingEndTimerRef.current
-      ) {
-        finish();
+      if (event.type === "output_audio_buffer.started") {
+        audioPlayingRef.current = true;
+        // 締めの音声が始まったので「音声なし」の保険は不要になる
+        clearTimeout(noAudioTimerRef.current);
+        noAudioTimerRef.current = null;
+        return;
+      }
+      if (event.type === "output_audio_buffer.stopped") {
+        audioPlayingRef.current = false;
+        if (pendingEndRef.current && !tailTimerRef.current) {
+          tailTimerRef.current = setTimeout(finish, END_TAIL_MS);
+        }
         return;
       }
       if (event.type === "response.done") {
@@ -176,6 +207,9 @@ export function useRealtimeInterview({ onEnded }) {
       setStatus("connecting");
       setErrorMessage(null);
       endedRef.current = false;
+      pendingEndRef.current = false;
+      audioPlayingRef.current = false;
+      clearEndTimers();
       try {
         if (mock) {
           const driver = createMockRealtimeDriver();
@@ -207,7 +241,7 @@ export function useRealtimeInterview({ onEnded }) {
         setErrorMessage(error.message);
       }
     },
-    [handleServerEvent]
+    [clearEndTimers, handleServerEvent]
   );
 
   const pushBoardSnapshot = useCallback((boardText) => {
@@ -234,11 +268,11 @@ export function useRealtimeInterview({ onEnded }) {
 
   useEffect(() => {
     return () => {
-      clearTimeout(pendingEndTimerRef.current);
+      clearEndTimers();
       driverRef.current?.disconnect();
       driverRef.current = null;
     };
-  }, []);
+  }, [clearEndTimers]);
 
   return {
     status,
