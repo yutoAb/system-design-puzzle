@@ -45,6 +45,14 @@ export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }
     [setEdges]
   );
 
+  const onEdgeClick = useCallback(
+    (event, edge) => {
+      event.stopPropagation();
+      setEdges((current) => current.filter((item) => item.id !== edge.id));
+    },
+    [setEdges]
+  );
+
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
@@ -96,6 +104,7 @@ export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }
   return (
     <div className="canvas-wrap" ref={wrapperRef}>
       <div className="board-overlay">
+        <p className="board-hint">接続線はクリックすると削除できます</p>
         <div className="actions">
           <button type="button" className="secondary-button" onClick={onReset}>
             配置を戻す
@@ -109,6 +118,7 @@ export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           fitView={false}
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
