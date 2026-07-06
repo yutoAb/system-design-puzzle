@@ -9,11 +9,12 @@ export default async function handler(request, response) {
   }
   try {
     const result = await interviewController.evaluateInterview(
-      request.body ?? {}
+      request.body ?? {},
+      bearerToken(request)
     );
     response.status(200).json(result);
   } catch (error) {
-    if (/アクセスコード/.test(error.message)) {
+    if (/アクセスコード|ログインが必要/.test(error.message)) {
       response.status(401).json({ error: error.message });
       return;
     }
@@ -23,4 +24,9 @@ export default async function handler(request, response) {
     }
     response.status(502).json({ error: error.message });
   }
+}
+
+function bearerToken(request) {
+  const header = request.headers.authorization ?? "";
+  return header.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
 }

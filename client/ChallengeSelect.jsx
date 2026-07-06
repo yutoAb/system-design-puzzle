@@ -1,33 +1,41 @@
 import { useState } from "react";
+import { AccountBar } from "./AccountBar.jsx";
 
 export function ChallengeSelect({
   challenges,
+  auth,
   accessCode,
   onAccessCodeChange,
   onStart
 }) {
   const [durationMode, setDurationMode] = useState("short");
+  const signedIn = Boolean(auth?.user);
 
   return (
     <div className="select-screen">
       <header className="intro">
+        <AccountBar auth={auth} />
         <p className="eyebrow">システム設計 模擬面接</p>
         <h1>お題を選んで面接を始める</h1>
         <p className="prompt">
           AI面接官と音声で会話しながら、ホワイトボードにアーキテクチャを描いて設計面接の練習をします。面接は「要件確認 → 概要設計 → 深掘り → まとめ」の4ステップで進みます。
         </p>
-        <div className="access-code">
-          <label htmlFor="accessCode">アクセスコード</label>
-          <input
-            id="accessCode"
-            type="password"
-            value={accessCode}
-            placeholder="共有されたコードを入力"
-            onChange={(event) => onAccessCodeChange(event.target.value)}
-            autoComplete="off"
-          />
-          <small>面接の開始に必要です（管理者から共有されます）</small>
-        </div>
+        {!signedIn && (
+          <div className="access-code">
+            <label htmlFor="accessCode">アクセスコード</label>
+            <input
+              id="accessCode"
+              type="password"
+              value={accessCode}
+              placeholder="共有されたコードを入力"
+              onChange={(event) => onAccessCodeChange(event.target.value)}
+              autoComplete="off"
+            />
+            <small>
+              面接の開始にはログインするか、共有されたアクセスコードを入力してください
+            </small>
+          </div>
+        )}
         <div className="duration-toggle" role="radiogroup" aria-label="面接時間">
           <label className={durationMode === "short" ? "active" : ""}>
             <input

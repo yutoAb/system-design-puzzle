@@ -11,6 +11,7 @@
     "preview": "npm run build && npm start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.0",
     "@xyflow/react": "^12.10.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"

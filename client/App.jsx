@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChallengeSelect } from "./ChallengeSelect.jsx";
 import { InterviewScreen } from "./InterviewScreen.jsx";
 import { ReportScreen } from "./ReportScreen.jsx";
+import { useAuth } from "./useAuth.js";
 
 const isMockMode = new URLSearchParams(window.location.search).has("mock");
 
@@ -18,6 +19,7 @@ export function App() {
   const [accessCode, setAccessCode] = useState(
     () => window.localStorage.getItem("interview-access-code") ?? ""
   );
+  const auth = useAuth();
 
   const handleAccessCodeChange = useCallback((value) => {
     setAccessCode(value);
@@ -59,9 +61,13 @@ export function App() {
         return;
       }
       try {
+        const headers = { "Content-Type": "application/json" };
+        if (auth.accessToken) {
+          headers.Authorization = `Bearer ${auth.accessToken}`;
+        }
         const response = await fetch("/api/evaluate-interview", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             challengeId: activeChallengeId,
             accessCode,
@@ -88,7 +94,7 @@ export function App() {
         setReportError(error.message);
       }
     },
-    [activeChallengeId, durationMode, nodes, edges, accessCode]
+    [activeChallengeId, durationMode, nodes, edges, accessCode, auth.accessToken]
   );
 
   const handleRestart = useCallback(() => {
@@ -110,6 +116,7 @@ export function App() {
         components={components}
         durationMode={durationMode}
         accessCode={accessCode}
+        accessToken={auth.accessToken}
         mock={isMockMode}
         nodes={nodes}
         edges={edges}
@@ -135,6 +142,7 @@ export function App() {
   return (
     <ChallengeSelect
       challenges={challenges}
+      auth={auth}
       accessCode={accessCode}
       onAccessCodeChange={handleAccessCodeChange}
       onStart={handleStart}
