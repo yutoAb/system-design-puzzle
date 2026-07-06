@@ -3,23 +3,16 @@ import { createInterviewController } from "../src/interface-adapters/interviewCo
 const interviewController = createInterviewController();
 
 export default async function handler(request, response) {
-  if (request.method !== "POST") {
+  if (request.method !== "GET") {
     response.status(405).json({ error: "Method not allowed" });
     return;
   }
   try {
-    const result = await interviewController.createInterviewSession(
-      request.body ?? {},
-      bearerToken(request)
-    );
+    const result = await interviewController.me(bearerToken(request));
     response.status(200).json(result);
   } catch (error) {
-    if (/アクセスコード|ログインが必要/.test(error.message)) {
+    if (/ログインが必要/.test(error.message)) {
       response.status(401).json({ error: error.message });
-      return;
-    }
-    if (/unknown challenge/.test(error.message)) {
-      response.status(400).json({ error: error.message });
       return;
     }
     response.status(502).json({ error: error.message });

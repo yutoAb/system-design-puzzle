@@ -31,6 +31,7 @@ export function InterviewScreen({
   components,
   durationMode,
   accessCode,
+  accessToken,
   mock,
   nodes,
   edges,
@@ -120,6 +121,7 @@ export function InterviewScreen({
                   challengeId: challenge.id,
                   durationMode,
                   accessCode,
+                  accessToken,
                   mock
                 })
               }

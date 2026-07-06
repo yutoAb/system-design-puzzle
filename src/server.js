@@ -23,13 +23,26 @@ const server = createServer(async (request, response) => {
       return sendJson(response, 200, interviewController.initialState());
     }
 
+    if (request.url === "/api/me" && request.method === "GET") {
+      try {
+        const result = await interviewController.me(bearerToken(request));
+        return sendJson(response, 200, result);
+      } catch (error) {
+        const status = /ログインが必要/.test(error.message) ? 401 : 502;
+        return sendJson(response, status, { error: error.message });
+      }
+    }
+
     if (request.url === "/api/realtime-session" && request.method === "POST") {
       const body = await readJsonBody(request);
       try {
-        const result = await interviewController.createInterviewSession(body);
+        const result = await interviewController.createInterviewSession(
+          body,
+          bearerToken(request)
+        );
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /アクセスコード/.test(error.message)
+        const status = /アクセスコード|ログインが必要/.test(error.message)
           ? 401
           : /unknown challenge/.test(error.message)
             ? 400
@@ -41,10 +54,13 @@ const server = createServer(async (request, response) => {
     if (request.url === "/api/evaluate-interview" && request.method === "POST") {
       const body = await readJsonBody(request);
       try {
-        const result = await interviewController.evaluateInterview(body);
+        const result = await interviewController.evaluateInterview(
+          body,
+          bearerToken(request)
+        );
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /アクセスコード/.test(error.message)
+        const status = /アクセスコード|ログインが必要/.test(error.message)
           ? 401
           : /unknown challenge|transcript is required/.test(error.message)
             ? 400
@@ -88,6 +104,11 @@ const port = Number(process.env.PORT ?? 4173);
 server.listen(port, () => {
   console.log(`システム設計模擬面接を http://localhost:${port} で起動しました`);
 });
+
+function bearerToken(request) {
+  const header = request.headers.authorization ?? "";
+  return header.startsWith("Bearer ") ? header.slice("Bearer ".length) : undefined;
+}
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
