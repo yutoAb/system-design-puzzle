@@ -3,3 +3,4 @@ memo.md
 node_modules/
 dist/
 .vercel
+supabase/.temp/
