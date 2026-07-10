@@ -76,6 +76,23 @@ export function ChallengeSelect({
           </article>
         ))}
       </div>
+      <footer className="site-footer">
+        <nav>
+          <a href="/legal/tokushoho.html" target="_blank" rel="noreferrer">
+            特定商取引法に基づく表記
+          </a>
+          <a href="/legal/terms.html" target="_blank" rel="noreferrer">
+            利用規約
+          </a>
+          <a href="/legal/privacy.html" target="_blank" rel="noreferrer">
+            プライバシーポリシー
+          </a>
+        </nav>
+        <p>
+          運営: yutoAb ／ お問い合わせ:{" "}
+          <a href="mailto:yuto27abe@gmail.com">yuto27abe@gmail.com</a>
+        </p>
+      </footer>
     </div>
   );
 }

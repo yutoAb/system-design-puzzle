@@ -15,19 +15,20 @@ export function AccountBar({ auth, balance, onBuy }) {
           )}
           {onBuy && (
             <>
+              {/* 表示価格は Stripe の Price（テスト/本番とも）と一致させること */}
               <button
                 type="button"
                 className="secondary-button"
                 onClick={() => onBuy("single")}
               >
-                1枚購入
+                1枚 ¥1,500
               </button>
               <button
                 type="button"
                 className="secondary-button"
                 onClick={() => onBuy("pack5")}
               >
-                5枚購入
+                5枚 ¥6,000
               </button>
             </>
           )}
