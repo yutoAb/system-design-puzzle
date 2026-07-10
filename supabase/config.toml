@@ -1,0 +1,15 @@
+project_id = "system-design-puzzle"
+
+[auth]
+site_url = "https://system-design-puzzle.vercel.app"
+additional_redirect_urls = [
+  "http://localhost:5173",
+  "https://system-design-puzzle.vercel.app"
+]
+
+# Google ログイン。client_id / secret は .env の値を env() で差し込む
+# （Google Cloud Console で OAuth クライアント作成後に supabase config push で反映）
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
