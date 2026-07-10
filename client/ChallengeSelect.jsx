@@ -7,6 +7,9 @@ export function ChallengeSelect({
   balance,
   mock,
   accessCode,
+  notice,
+  purchaseError,
+  onBuy,
   onAccessCodeChange,
   onStart
 }) {
@@ -25,7 +28,9 @@ export function ChallengeSelect({
   return (
     <div className="select-screen">
       <header className="intro">
-        <AccountBar auth={auth} balance={balance} />
+        <AccountBar auth={auth} balance={balance} onBuy={onBuy} />
+        {notice && <p className="checkout-notice">{notice}</p>}
+        {purchaseError && <p className="start-blocked">{purchaseError}</p>}
         <p className="eyebrow">システム設計 模擬面接</p>
         <h1>お題を選んで面接を始める</h1>
         <p className="prompt">

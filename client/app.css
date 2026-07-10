@@ -728,6 +728,15 @@ button.danger-button {
   font-weight: 700;
 }
 
+.checkout-notice {
+  background: #eaf6ef;
+  border: 1px solid #bfe3cd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+}
+
 .start-blocked {
   color: #a34d2b;
   font-size: 0.9rem;

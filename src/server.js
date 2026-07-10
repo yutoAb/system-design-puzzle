@@ -33,6 +33,37 @@ const server = createServer(async (request, response) => {
       }
     }
 
+    if (request.url === "/api/create-checkout" && request.method === "POST") {
+      const body = await readJsonBody(request);
+      try {
+        const result = await interviewController.createCheckout(
+          body,
+          bearerToken(request)
+        );
+        return sendJson(response, 200, result);
+      } catch (error) {
+        const status = /ログインが必要/.test(error.message)
+          ? 401
+          : /不明なチケットパック|決済が有効になっていません/.test(error.message)
+            ? 400
+            : 502;
+        return sendJson(response, status, { error: error.message });
+      }
+    }
+
+    if (request.url === "/api/stripe-webhook" && request.method === "POST") {
+      const rawBody = await readRawBody(request);
+      try {
+        const result = await interviewController.handleStripeWebhook({
+          rawBody,
+          signature: request.headers["stripe-signature"]
+        });
+        return sendJson(response, 200, result);
+      } catch (error) {
+        return sendJson(response, 400, { error: error.message });
+      }
+    }
+
     if (request.url === "/api/realtime-session" && request.method === "POST") {
       const body = await readJsonBody(request);
       try {
@@ -119,20 +150,18 @@ function sendJson(response, statusCode, payload) {
   response.end(JSON.stringify(payload));
 }
 
-function readJsonBody(request) {
+function readRawBody(request) {
   return new Promise((resolve, reject) => {
     let rawBody = "";
     request.setEncoding("utf8");
     request.on("data", (chunk) => {
       rawBody += chunk;
     });
-    request.on("end", () => {
-      try {
-        resolve(JSON.parse(rawBody || "{}"));
-      } catch (error) {
-        reject(error);
-      }
-    });
+    request.on("end", () => resolve(rawBody));
     request.on("error", reject);
   });
+}
+
+async function readJsonBody(request) {
+  return JSON.parse((await readRawBody(request)) || "{}");
 }
