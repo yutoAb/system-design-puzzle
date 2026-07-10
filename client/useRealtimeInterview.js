@@ -200,7 +200,7 @@ export function useRealtimeInterview({ onEnded }) {
   );
 
   const connect = useCallback(
-    async ({ challengeId, durationMode, accessCode, accessToken, mock = false }) => {
+    async ({ challengeId, durationMode, accessToken, mock = false }) => {
       if (driverRef.current) {
         return;
       }
@@ -223,7 +223,7 @@ export function useRealtimeInterview({ onEnded }) {
           const sessionResponse = await fetch("/api/realtime-session", {
             method: "POST",
             headers,
-            body: JSON.stringify({ challengeId, durationMode, accessCode })
+            body: JSON.stringify({ challengeId, durationMode })
           });
           if (!sessionResponse.ok) {
             const data = await sessionResponse.json().catch(() => ({}));

@@ -6,23 +6,21 @@ export function ChallengeSelect({
   auth,
   balance,
   mock,
-  accessCode,
   notice,
   purchaseError,
   onBuy,
-  onAccessCodeChange,
   onStart
 }) {
   const [durationMode, setDurationMode] = useState("short");
   const signedIn = Boolean(auth?.user);
 
-  // モックはゲートなし。ログイン済みなら残高、未ログインならアクセスコードの有無で判定
+  // モックはゲートなし。ログイン済みなら残高の有無で判定
   const startBlockedReason = mock
     ? null
     : signedIn && balance === 0
-      ? "チケットがありません。面接1回につきチケット1枚が必要です（購入機能は準備中）"
-      : auth?.enabled && !auth.loading && !signedIn && accessCode.trim() === ""
-        ? "面接を始めるにはログインするか、アクセスコードを入力してください"
+      ? "チケットがありません。面接1回につきチケット1枚が必要です"
+      : auth?.enabled && !auth.loading && !signedIn
+        ? "面接を始めるにはログインしてください"
         : null;
 
   return (
@@ -36,22 +34,6 @@ export function ChallengeSelect({
         <p className="prompt">
           AI面接官と音声で会話しながら、ホワイトボードにアーキテクチャを描いて設計面接の練習をします。面接は「要件確認 → 概要設計 → 深掘り → まとめ」の4ステップで進みます。
         </p>
-        {!signedIn && (
-          <div className="access-code">
-            <label htmlFor="accessCode">アクセスコード</label>
-            <input
-              id="accessCode"
-              type="password"
-              value={accessCode}
-              placeholder="共有されたコードを入力"
-              onChange={(event) => onAccessCodeChange(event.target.value)}
-              autoComplete="off"
-            />
-            <small>
-              面接の開始にはログインするか、共有されたアクセスコードを入力してください
-            </small>
-          </div>
-        )}
         {startBlockedReason && (
           <p className="start-blocked">{startBlockedReason}</p>
         )}

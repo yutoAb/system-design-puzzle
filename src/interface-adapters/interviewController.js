@@ -19,7 +19,6 @@ import {
 } from "../infrastructure/stripeClient.js";
 import { TICKET_PACKS } from "../domain/billing/ticketPacks.js";
 
-export const ACCESS_CODE_ERROR = "アクセスコードが正しくありません";
 export const CHECKOUT_UNAVAILABLE_ERROR = "決済が有効になっていません";
 export const UNKNOWN_PACK_ERROR = "不明なチケットパックです";
 export { AUTH_ERROR, NO_TICKET_ERROR, WEBHOOK_SIGNATURE_ERROR };
@@ -31,7 +30,6 @@ export function createInterviewController() {
     apiKey: process.env.OPENAI_API_KEY,
     mock: process.env.MOCK_OPENAI === "1"
   });
-  const accessCode = process.env.ACCESS_CODE;
   const authGateway = createSupabaseAuthGateway({
     url: process.env.SUPABASE_URL,
     secretKey: process.env.SUPABASE_SECRET_KEY,
@@ -50,17 +48,10 @@ export function createInterviewController() {
   const appBaseUrl = process.env.APP_BASE_URL ?? "http://localhost:5173";
 
   // OpenAI を呼ぶ（= 課金が発生する）エンドポイントを守る。
-  // 移行期間: 招待コード一致は従来どおり通し、それ以外は Supabase ログインを検証する。
-  // Supabase 未設定なら従来の招待コードのみの動作に落ちる。
-  async function authorize(requestBody, authToken) {
-    if (accessCode && requestBody?.accessCode === accessCode) {
-      return null;
-    }
+  // Supabase 未設定（ローカル開発）ならゲートなしで通す。
+  async function authorize(authToken) {
     if (authGateway) {
       return authGateway.verifyToken(authToken);
-    }
-    if (accessCode) {
-      throw new Error(ACCESS_CODE_ERROR);
     }
     return null;
   }
@@ -97,8 +88,7 @@ export function createInterviewController() {
       return { userId: user.userId, email: user.email, balance };
     },
     async createInterviewSession(requestBody, authToken) {
-      const user = await authorize(requestBody, authToken);
-      // 招待コードバイパス（user が null）はチケットを消費しない
+      const user = await authorize(authToken);
       if (user && ticketGateway) {
         await ticketGateway.consumeTicket(user.userId);
         try {
@@ -114,7 +104,7 @@ export function createInterviewController() {
       return createInterviewSession(requestBody ?? {});
     },
     async evaluateInterview(requestBody, authToken) {
-      await authorize(requestBody, authToken);
+      await authorize(authToken);
       return evaluateInterview(requestBody ?? {});
     },
     async createCheckout(requestBody, authToken) {

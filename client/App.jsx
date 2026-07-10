@@ -17,9 +17,6 @@ export function App() {
   const [edges, setEdges] = useState([]);
   const [report, setReport] = useState(null);
   const [reportError, setReportError] = useState(null);
-  const [accessCode, setAccessCode] = useState(
-    () => window.localStorage.getItem("interview-access-code") ?? ""
-  );
   const auth = useAuth();
   const tickets = useTickets(auth.accessToken);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
@@ -90,11 +87,6 @@ export function App() {
     [auth.accessToken]
   );
 
-  const handleAccessCodeChange = useCallback((value) => {
-    setAccessCode(value);
-    window.localStorage.setItem("interview-access-code", value);
-  }, []);
-
   useEffect(() => {
     fetch("/api/initial-state")
       .then((response) => response.json())
@@ -139,7 +131,6 @@ export function App() {
           headers,
           body: JSON.stringify({
             challengeId: activeChallengeId,
-            accessCode,
             durationMode,
             transcript: spokenEntries.map(({ role, text, phase }) => ({
               role,
@@ -163,7 +154,7 @@ export function App() {
         setReportError(error.message);
       }
     },
-    [activeChallengeId, durationMode, nodes, edges, accessCode, auth.accessToken]
+    [activeChallengeId, durationMode, nodes, edges, auth.accessToken]
   );
 
   const handleRestart = useCallback(() => {
@@ -185,7 +176,6 @@ export function App() {
         challenge={activeChallenge}
         components={components}
         durationMode={durationMode}
-        accessCode={accessCode}
         accessToken={auth.accessToken}
         mock={isMockMode}
         nodes={nodes}
@@ -215,11 +205,9 @@ export function App() {
       auth={auth}
       balance={tickets.balance}
       mock={isMockMode}
-      accessCode={accessCode}
       notice={checkoutNotice}
       purchaseError={purchaseError}
       onBuy={handleBuy}
-      onAccessCodeChange={handleAccessCodeChange}
       onStart={handleStart}
     />
   );
