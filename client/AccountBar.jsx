@@ -1,4 +1,4 @@
-export function AccountBar({ auth, balance }) {
+export function AccountBar({ auth, balance, onBuy }) {
   if (!auth.enabled) {
     return null;
   }
@@ -12,6 +12,24 @@ export function AccountBar({ auth, balance }) {
           <span className="account-email">{auth.user.email}</span>
           {balance != null && (
             <span className="account-tickets">チケット {balance}枚</span>
+          )}
+          {onBuy && (
+            <>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onBuy("single")}
+              >
+                1枚購入
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onBuy("pack5")}
+              >
+                5枚購入
+              </button>
+            </>
           )}
           <button type="button" className="secondary-button" onClick={auth.signOut}>
             ログアウト

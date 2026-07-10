@@ -22,6 +22,73 @@ export function App() {
   );
   const auth = useAuth();
   const tickets = useTickets(auth.accessToken);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
+  const [checkoutReturned, setCheckoutReturned] = useState(false);
+  const [purchaseError, setPurchaseError] = useState(null);
+
+  // Stripe Checkout からの戻り: クエリを消してから残高反映を待つ
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get("checkout");
+    if (!checkout) {
+      return;
+    }
+    params.delete("checkout");
+    params.delete("session_id");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}`
+    );
+    if (checkout === "success") {
+      setCheckoutNotice(
+        "決済が完了しました。チケット残数への反映まで数秒かかることがあります"
+      );
+      setCheckoutReturned(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!checkoutReturned || !auth.accessToken) {
+      return undefined;
+    }
+    // webhook 経由の付与が遅れることがあるので数回リトライして残高を取り直す
+    const timers = [0, 2000, 4000, 8000].map((delay) =>
+      setTimeout(() => tickets.refresh(), delay)
+    );
+    const clearNotice = setTimeout(() => setCheckoutNotice(null), 12000);
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(clearNotice);
+    };
+  }, [checkoutReturned, auth.accessToken, tickets.refresh]);
+
+  const handleBuy = useCallback(
+    async (packId) => {
+      setPurchaseError(null);
+      try {
+        const response = await fetch("/api/create-checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`
+          },
+          body: JSON.stringify({ packId })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(
+            data.error ?? `購入手続きの開始に失敗しました (${response.status})`
+          );
+        }
+        window.location.href = data.url;
+      } catch (error) {
+        setPurchaseError(error.message);
+      }
+    },
+    [auth.accessToken]
+  );
 
   const handleAccessCodeChange = useCallback((value) => {
     setAccessCode(value);
@@ -149,6 +216,9 @@ export function App() {
       balance={tickets.balance}
       mock={isMockMode}
       accessCode={accessCode}
+      notice={checkoutNotice}
+      purchaseError={purchaseError}
+      onBuy={handleBuy}
       onAccessCodeChange={handleAccessCodeChange}
       onStart={handleStart}
     />
