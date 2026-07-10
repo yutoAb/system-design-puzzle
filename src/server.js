@@ -73,7 +73,7 @@ const server = createServer(async (request, response) => {
         );
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /アクセスコード|ログインが必要/.test(error.message)
+        const status = /ログインが必要/.test(error.message)
           ? 401
           : /チケットが不足/.test(error.message)
             ? 402
@@ -93,7 +93,7 @@ const server = createServer(async (request, response) => {
         );
         return sendJson(response, 200, result);
       } catch (error) {
-        const status = /アクセスコード|ログインが必要/.test(error.message)
+        const status = /ログインが必要/.test(error.message)
           ? 401
           : /unknown challenge|transcript is required/.test(error.message)
             ? 400

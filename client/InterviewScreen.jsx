@@ -30,7 +30,6 @@ export function InterviewScreen({
   challenge,
   components,
   durationMode,
-  accessCode,
   accessToken,
   mock,
   nodes,
@@ -120,7 +119,6 @@ export function InterviewScreen({
                 connect({
                   challengeId: challenge.id,
                   durationMode,
-                  accessCode,
                   accessToken,
                   mock
                 })

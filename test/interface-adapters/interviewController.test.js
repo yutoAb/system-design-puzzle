@@ -2,68 +2,15 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 
 import {
-  ACCESS_CODE_ERROR,
   AUTH_ERROR,
   NO_TICKET_ERROR,
   createInterviewController
 } from "../../src/interface-adapters/interviewController.js";
 
 afterEach(() => {
-  delete process.env.ACCESS_CODE;
   delete process.env.MOCK_OPENAI;
   delete process.env.MOCK_AUTH;
   delete process.env.MOCK_TICKET_BALANCE;
-});
-
-describe("interviewController access code", () => {
-  it("rejects session creation without the correct access code", async () => {
-    process.env.ACCESS_CODE = "himitsu";
-    process.env.MOCK_OPENAI = "1";
-    const controller = createInterviewController();
-
-    await assert.rejects(
-      controller.createInterviewSession({ challengeId: "video-streaming-1m" }),
-      new RegExp(ACCESS_CODE_ERROR)
-    );
-    await assert.rejects(
-      controller.createInterviewSession({
-        challengeId: "video-streaming-1m",
-        accessCode: "wrong"
-      }),
-      new RegExp(ACCESS_CODE_ERROR)
-    );
-    await assert.rejects(
-      controller.evaluateInterview({
-        challengeId: "video-streaming-1m",
-        accessCode: "wrong",
-        transcript: [{ role: "user", text: "x" }],
-        board: { componentIds: [], connections: [] }
-      }),
-      new RegExp(ACCESS_CODE_ERROR)
-    );
-  });
-
-  it("accepts the correct access code", async () => {
-    process.env.ACCESS_CODE = "himitsu";
-    process.env.MOCK_OPENAI = "1";
-    const controller = createInterviewController();
-
-    const session = await controller.createInterviewSession({
-      challengeId: "video-streaming-1m",
-      accessCode: "himitsu"
-    });
-    assert.equal(session.clientSecret, "ek_mock");
-  });
-
-  it("skips the check when ACCESS_CODE is not configured", async () => {
-    process.env.MOCK_OPENAI = "1";
-    const controller = createInterviewController();
-
-    const session = await controller.createInterviewSession({
-      challengeId: "video-streaming-1m"
-    });
-    assert.equal(session.clientSecret, "ek_mock");
-  });
 });
 
 describe("interviewController auth", () => {
@@ -110,15 +57,12 @@ describe("interviewController auth", () => {
     await assert.rejects(controller.me(undefined), new RegExp(AUTH_ERROR));
   });
 
-  it("still honors the access code bypass while auth is enabled", async () => {
-    process.env.ACCESS_CODE = "himitsu";
-    process.env.MOCK_AUTH = "1";
+  it("skips the gate entirely when Supabase is not configured", async () => {
     process.env.MOCK_OPENAI = "1";
     const controller = createInterviewController();
 
     const session = await controller.createInterviewSession({
-      challengeId: "video-streaming-1m",
-      accessCode: "himitsu"
+      challengeId: "video-streaming-1m"
     });
     assert.equal(session.clientSecret, "ek_mock");
   });
@@ -182,17 +126,12 @@ describe("interviewController tickets", () => {
     assert.equal(me.balance, 1);
   });
 
-  it("does not consume tickets on evaluation or access code bypass", async () => {
-    process.env.ACCESS_CODE = "himitsu";
+  it("does not consume tickets on evaluation", async () => {
     process.env.MOCK_AUTH = "1";
     process.env.MOCK_OPENAI = "1";
     process.env.MOCK_TICKET_BALANCE = "1";
     const controller = createInterviewController();
 
-    await controller.createInterviewSession({
-      challengeId: "video-streaming-1m",
-      accessCode: "himitsu"
-    });
     await controller.evaluateInterview(
       {
         challengeId: "video-streaming-1m",

@@ -14,7 +14,7 @@ export default async function handler(request, response) {
     );
     response.status(200).json(result);
   } catch (error) {
-    if (/アクセスコード|ログインが必要/.test(error.message)) {
+    if (/ログインが必要/.test(error.message)) {
       response.status(401).json({ error: error.message });
       return;
     }
