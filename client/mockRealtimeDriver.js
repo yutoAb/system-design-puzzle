@@ -34,7 +34,7 @@ const SCRIPT = [
   [800, assistantSpeech("m1", "こんにちは、本日面接を担当します。まずはお題を説明しますね。（モック応答）")],
   [1600, functionCall("advance_phase", { phase: "requirements" })],
   [3000, userSpeech("m2", "同時接続ユーザー数はどのくらいを想定していますか？（モック候補者）")],
-  [4500, assistantSpeech("m3", "良い質問です。ピーク時は100万人を想定してください。他に確認したい点はありますか？")],
+  [4500, assistantSpeech("m3", "良い質問です。ピーク時は50万人の同時視聴を想定してください。他に確認したい点はありますか？")],
   [6500, functionCall("advance_phase", { phase: "high_level" })],
   [8000, assistantSpeech("m4", "では全体のアーキテクチャをホワイトボードに描きながら説明してください。")],
   [10000, userSpeech("m5", "まずロードバランサーを置いて、その後ろにアプリケーションサーバーを並べます。")],
