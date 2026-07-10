@@ -12,7 +12,7 @@ describe("buildInterviewerInstructions", () => {
   );
 
   it("embeds the challenge prompt and requirements", () => {
-    assert.match(instructions, /100万人同時視聴の動画配信/);
+    assert.match(instructions, /オンライン予備校のライブ授業配信/);
     for (const req of videoStreamingChallenge.functionalRequirements) {
       assert.ok(instructions.includes(req), `missing requirement: ${req}`);
     }

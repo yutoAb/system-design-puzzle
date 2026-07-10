@@ -20,7 +20,7 @@ describe("buildEvaluationPrompt", () => {
   );
 
   it("embeds the challenge, rubric concepts, board, and transcript", () => {
-    assert.match(input, /10万同時接続のリアルタイムチャット/);
+    assert.match(input, /スマホゲームのフレンド＆ギルドチャット/);
     for (const concept of chatServiceChallenge.targetConcepts) {
       assert.ok(input.includes(concept), `missing concept: ${concept}`);
     }
