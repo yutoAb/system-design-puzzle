@@ -44,9 +44,11 @@ const server = createServer(async (request, response) => {
       } catch (error) {
         const status = /アクセスコード|ログインが必要/.test(error.message)
           ? 401
-          : /unknown challenge/.test(error.message)
-            ? 400
-            : 502;
+          : /チケットが不足/.test(error.message)
+            ? 402
+            : /unknown challenge/.test(error.message)
+              ? 400
+              : 502;
         return sendJson(response, status, { error: error.message });
       }
     }
