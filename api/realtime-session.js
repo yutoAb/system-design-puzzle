@@ -18,6 +18,10 @@ export default async function handler(request, response) {
       response.status(401).json({ error: error.message });
       return;
     }
+    if (/チケットが不足/.test(error.message)) {
+      response.status(402).json({ error: error.message });
+      return;
+    }
     if (/unknown challenge/.test(error.message)) {
       response.status(400).json({ error: error.message });
       return;

@@ -3,6 +3,7 @@ import { ChallengeSelect } from "./ChallengeSelect.jsx";
 import { InterviewScreen } from "./InterviewScreen.jsx";
 import { ReportScreen } from "./ReportScreen.jsx";
 import { useAuth } from "./useAuth.js";
+import { useTickets } from "./useTickets.js";
 
 const isMockMode = new URLSearchParams(window.location.search).has("mock");
 
@@ -20,6 +21,7 @@ export function App() {
     () => window.localStorage.getItem("interview-access-code") ?? ""
   );
   const auth = useAuth();
+  const tickets = useTickets(auth.accessToken);
 
   const handleAccessCodeChange = useCallback((value) => {
     setAccessCode(value);
@@ -103,7 +105,8 @@ export function App() {
     setEdges([]);
     setReport(null);
     setReportError(null);
-  }, []);
+    tickets.refresh();
+  }, [tickets.refresh]);
 
   if (challenges.length === 0) {
     return <p style={{ padding: 32 }}>読み込み中…</p>;
@@ -143,6 +146,8 @@ export function App() {
     <ChallengeSelect
       challenges={challenges}
       auth={auth}
+      balance={tickets.balance}
+      mock={isMockMode}
       accessCode={accessCode}
       onAccessCodeChange={handleAccessCodeChange}
       onStart={handleStart}

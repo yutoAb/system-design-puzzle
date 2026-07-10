@@ -9,9 +9,13 @@ import {
   AUTH_ERROR,
   createSupabaseAuthGateway
 } from "../infrastructure/supabaseAuthGateway.js";
+import {
+  NO_TICKET_ERROR,
+  createSupabaseTicketGateway
+} from "../infrastructure/supabaseTicketGateway.js";
 
 export const ACCESS_CODE_ERROR = "アクセスコードが正しくありません";
-export { AUTH_ERROR };
+export { AUTH_ERROR, NO_TICKET_ERROR };
 
 export function createInterviewController() {
   const challengeRepository = createInMemoryChallengeRepository();
@@ -22,6 +26,11 @@ export function createInterviewController() {
   });
   const accessCode = process.env.ACCESS_CODE;
   const authGateway = createSupabaseAuthGateway({
+    url: process.env.SUPABASE_URL,
+    secretKey: process.env.SUPABASE_SECRET_KEY,
+    mock: process.env.MOCK_AUTH === "1"
+  });
+  const ticketGateway = createSupabaseTicketGateway({
     url: process.env.SUPABASE_URL,
     secretKey: process.env.SUPABASE_SECRET_KEY,
     mock: process.env.MOCK_AUTH === "1"
@@ -69,11 +78,26 @@ export function createInterviewController() {
         throw new Error(AUTH_ERROR);
       }
       const user = await authGateway.verifyToken(authToken);
-      // balance は M2（チケット台帳）で実残高になる
-      return { userId: user.userId, email: user.email, balance: null };
+      const balance = ticketGateway
+        ? await ticketGateway.getBalance(user.userId)
+        : null;
+      return { userId: user.userId, email: user.email, balance };
     },
     async createInterviewSession(requestBody, authToken) {
-      await authorize(requestBody, authToken);
+      const user = await authorize(requestBody, authToken);
+      // 招待コードバイパス（user が null）はチケットを消費しない
+      if (user && ticketGateway) {
+        await ticketGateway.consumeTicket(user.userId);
+        try {
+          return await createInterviewSession(requestBody ?? {});
+        } catch (error) {
+          // OpenAI 側の失敗でチケットだけ減るのを防ぐ（ベストエフォート返金）
+          await ticketGateway
+            .grantTickets({ userId: user.userId, amount: 1, reason: "admin_grant" })
+            .catch(() => {});
+          throw error;
+        }
+      }
       return createInterviewSession(requestBody ?? {});
     },
     async evaluateInterview(requestBody, authToken) {

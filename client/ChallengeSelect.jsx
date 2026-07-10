@@ -4,6 +4,8 @@ import { AccountBar } from "./AccountBar.jsx";
 export function ChallengeSelect({
   challenges,
   auth,
+  balance,
+  mock,
   accessCode,
   onAccessCodeChange,
   onStart
@@ -11,10 +13,19 @@ export function ChallengeSelect({
   const [durationMode, setDurationMode] = useState("short");
   const signedIn = Boolean(auth?.user);
 
+  // モックはゲートなし。ログイン済みなら残高、未ログインならアクセスコードの有無で判定
+  const startBlockedReason = mock
+    ? null
+    : signedIn && balance === 0
+      ? "チケットがありません。面接1回につきチケット1枚が必要です（購入機能は準備中）"
+      : auth?.enabled && !auth.loading && !signedIn && accessCode.trim() === ""
+        ? "面接を始めるにはログインするか、アクセスコードを入力してください"
+        : null;
+
   return (
     <div className="select-screen">
       <header className="intro">
-        <AccountBar auth={auth} />
+        <AccountBar auth={auth} balance={balance} />
         <p className="eyebrow">システム設計 模擬面接</p>
         <h1>お題を選んで面接を始める</h1>
         <p className="prompt">
@@ -35,6 +46,9 @@ export function ChallengeSelect({
               面接の開始にはログインするか、共有されたアクセスコードを入力してください
             </small>
           </div>
+        )}
+        {startBlockedReason && (
+          <p className="start-blocked">{startBlockedReason}</p>
         )}
         <div className="duration-toggle" role="radiogroup" aria-label="面接時間">
           <label className={durationMode === "short" ? "active" : ""}>
@@ -67,6 +81,7 @@ export function ChallengeSelect({
             <button
               type="button"
               className="primary"
+              disabled={Boolean(startBlockedReason)}
               onClick={() => onStart(challenge.id, durationMode)}
             >
               この課題で面接を始める

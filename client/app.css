@@ -722,3 +722,20 @@ button.danger-button {
   font-size: 0.85rem;
   opacity: 0.75;
 }
+
+.account-bar .account-tickets {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.start-blocked {
+  color: #a34d2b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 12px 0 0;
+}
+
+.challenge-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

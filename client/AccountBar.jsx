@@ -1,4 +1,4 @@
-export function AccountBar({ auth }) {
+export function AccountBar({ auth, balance }) {
   if (!auth.enabled) {
     return null;
   }
@@ -10,6 +10,9 @@ export function AccountBar({ auth }) {
       {auth.user ? (
         <>
           <span className="account-email">{auth.user.email}</span>
+          {balance != null && (
+            <span className="account-tickets">チケット {balance}枚</span>
+          )}
           <button type="button" className="secondary-button" onClick={auth.signOut}>
             ログアウト
           </button>
