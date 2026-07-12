@@ -11,15 +11,15 @@
     "preview": "npm run build && npm start"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.0",
-    "@xyflow/react": "^12.10.2",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "@supabase/supabase-js": "^2.110.2",
+    "@xyflow/react": "^12.11.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "stripe": "^22.3.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^6.0.3",
     "concurrently": "^9.2.1",
-    "vite": "^8.0.9"
+    "vite": "^8.1.4"
   }
 }
