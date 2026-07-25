@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   Background,
   Controls,
@@ -7,13 +7,36 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  useNodesInitialized,
   useReactFlow
 } from "@xyflow/react";
 import { nodeTypes, stageKeyMap } from "./ComponentNode.jsx";
 
-export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }) {
+export function Canvas({
+  nodes,
+  edges,
+  setNodes,
+  setEdges,
+  components,
+  mock,
+  onReset
+}) {
   const wrapperRef = useRef(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
+  // 追加直後のノードは寸法が未計測で、その状態では fitView が範囲を出せない
+  const nodesInitialized = useNodesInitialized();
+
+  // デモは自動配置なので、増えたピースが画面外に出ないよう都度収める
+  useEffect(() => {
+    if (!mock || nodes.length === 0) {
+      return undefined;
+    }
+    const timer = setTimeout(
+      () => fitView({ padding: 0.12, duration: 400 }),
+      120
+    );
+    return () => clearTimeout(timer);
+  }, [mock, nodes.length, nodesInitialized, fitView]);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((current) => applyNodeChanges(changes, current)),
@@ -104,7 +127,11 @@ export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }
   return (
     <div className="canvas-wrap" ref={wrapperRef}>
       <div className="board-overlay">
-        <p className="board-hint">接続線はクリックすると削除できます</p>
+        <p className="board-hint">
+          {mock
+            ? "デモでは会話に合わせてピースが自動で配置されます（自分でドラッグすることもできます）"
+            : "接続線はクリックすると削除できます"}
+        </p>
         <div className="actions">
           <button type="button" className="secondary-button" onClick={onReset}>
             配置を戻す
@@ -121,7 +148,10 @@ export function Canvas({ nodes, edges, setNodes, setEdges, components, onReset }
           onEdgeClick={onEdgeClick}
           nodeTypes={nodeTypes}
           fitView={false}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          // デモの自動配置は横に広い構成になるため、最初から引いた画角で始める
+          defaultViewport={
+            mock ? { x: 24, y: 60, zoom: 0.7 } : { x: 0, y: 0, zoom: 1 }
+          }
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={24} color="#d7ece4" />
