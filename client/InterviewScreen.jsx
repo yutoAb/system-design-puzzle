@@ -99,7 +99,7 @@ export function InterviewScreen({
     <div className="interview-screen">
       <header className="interview-header">
         <div className="interview-title">
-          <p className="eyebrow">システム設計 模擬面接{mock ? "（モック）" : ""}</p>
+          <p className="eyebrow">システム設計 模擬面接{mock ? "（デモ）" : ""}</p>
           <h1>{challenge.title}</h1>
         </div>
         <PhaseIndicator phase={phase} />
@@ -124,7 +124,7 @@ export function InterviewScreen({
                 })
               }
             >
-              マイクをオンにして面接開始
+              {mock ? "デモを再生する" : "マイクをオンにして面接開始"}
             </button>
           ) : (
             <>

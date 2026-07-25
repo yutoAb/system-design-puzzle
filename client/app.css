@@ -746,3 +746,99 @@ button.danger-button {
 .site-footer a {
   color: inherit;
 }
+
+/* 未ログイン時のランディング（何が体験できるかを先に見せる） */
+.pitch-steps {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+  margin: 24px 0 0;
+  max-width: 960px;
+  padding: 0;
+}
+
+.pitch-steps li {
+  background: #ffffff;
+  border: 2px solid #29322d;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+
+.pitch-step-number {
+  align-items: center;
+  background: #e94f37;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.pitch-steps strong {
+  font-size: 0.95rem;
+}
+
+.pitch-steps small {
+  color: #5c6660;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.pitch-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.demo-link {
+  color: #29322d;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.pitch-note {
+  color: #4a554e;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin: 16px 0 0;
+  max-width: 760px;
+}
+
+.demo-banner {
+  background: #fdf1d6;
+  border: 1px solid #e0c07a;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin: 8px 0 16px;
+  padding: 8px 12px;
+}
+
+.demo-banner a {
+  color: inherit;
+  margin-left: 8px;
+}
+
+.report-screen .demo-banner {
+  margin: 16px 32px 0;
+}
+
+@media (max-width: 900px) {
+  .pitch-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .pitch-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,6 +1,29 @@
 import { useState } from "react";
 import { AccountBar } from "./AccountBar.jsx";
 
+const STEPS = [
+  {
+    step: "1",
+    label: "要件・スコープ確認",
+    text: "面接官に質問して、規模や前提を自分で引き出します"
+  },
+  {
+    step: "2",
+    label: "概要設計",
+    text: "ホワイトボードにコンポーネントを置き、全体像を説明します"
+  },
+  {
+    step: "3",
+    label: "深掘り",
+    text: "ボトルネックや障害時の挙動を面接官に突っ込まれます"
+  },
+  {
+    step: "4",
+    label: "まとめ",
+    text: "終了後、その場で評価レポートと模範解答が出ます"
+  }
+];
+
 export function ChallengeSelect({
   challenges,
   auth,
@@ -23,17 +46,64 @@ export function ChallengeSelect({
         ? "面接を始めるにはログインしてください"
         : null;
 
+  // 未ログインの訪問者には、ログインを求める前に何が体験できるかを説明する
+  const showPitch = !mock && Boolean(auth?.enabled) && !auth.loading && !signedIn;
+
   return (
     <div className="select-screen">
       <header className="intro">
         <AccountBar auth={auth} balance={balance} onBuy={onBuy} />
         {notice && <p className="checkout-notice">{notice}</p>}
         {purchaseError && <p className="start-blocked">{purchaseError}</p>}
+        {mock && (
+          <p className="demo-banner">
+            デモモードです。面接官の応答はあらかじめ用意した台本で、マイクは使いません（約20秒で終わります）。
+            <a href="/">通常モードに戻る</a>
+          </p>
+        )}
         <p className="eyebrow">システム設計 模擬面接</p>
-        <h1>お題を選んで面接を始める</h1>
-        <p className="prompt">
-          AI面接官と音声で会話しながら、ホワイトボードにアーキテクチャを描いて設計面接の練習をします。面接は「要件確認 → 概要設計 → 深掘り → まとめ」の4ステップで進みます。
-        </p>
+        {showPitch ? (
+          <>
+            <h1>AI面接官と音声で、システム設計面接の練習を。</h1>
+            <p className="prompt">
+              お題を選ぶと、AI面接官との音声面接が始まります。ホワイトボードにアーキテクチャを描きながら会話し、終了後にその場で評価レポートが出ます。読むだけの対策と違って、実際に説明する練習ができます。
+            </p>
+            <ol className="pitch-steps">
+              {STEPS.map((item) => (
+                <li key={item.step}>
+                  <span className="pitch-step-number">{item.step}</span>
+                  <strong>{item.label}</strong>
+                  <small>{item.text}</small>
+                </li>
+              ))}
+            </ol>
+            <div className="pitch-actions">
+              <button
+                type="button"
+                className="primary"
+                onClick={auth.signInWithGoogle}
+              >
+                Googleでログインして始める
+              </button>
+              <a className="demo-link" href="?mock=1">
+                ログインなしでデモを見る
+              </a>
+            </div>
+            <p className="pitch-note">
+              登録時にチケットを1枚お渡しするので、初回は無料で面接できます。以降は面接1回につきチケット1枚（1枚
+              ¥1,500 ／ 5枚パック ¥6,000）。マイクが使える PC 版の Chrome / Edge /
+              Safari を推奨します。
+            </p>
+          </>
+        ) : (
+          <>
+            <h1>お題を選んで面接を始める</h1>
+            <p className="prompt">
+              AI面接官と音声で会話しながら、ホワイトボードにアーキテクチャを描いて設計面接の練習をします。面接は「要件確認
+              → 概要設計 → 深掘り → まとめ」の4ステップで進みます。
+            </p>
+          </>
+        )}
         {startBlockedReason && (
           <p className="start-blocked">{startBlockedReason}</p>
         )}
@@ -71,7 +141,7 @@ export function ChallengeSelect({
               disabled={Boolean(startBlockedReason)}
               onClick={() => onStart(challenge.id, durationMode)}
             >
-              この課題で面接を始める
+              {mock ? "この課題のデモを見る" : "この課題で面接を始める"}
             </button>
           </article>
         ))}
