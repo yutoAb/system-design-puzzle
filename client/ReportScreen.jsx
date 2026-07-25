@@ -13,6 +13,7 @@ export function ReportScreen({
   error,
   challenge,
   components,
+  mock,
   onRestart
 }) {
   const [showReference, setShowReference] = useState(false);
@@ -23,6 +24,14 @@ export function ReportScreen({
         <p className="eyebrow">面接結果</p>
         <h1>{challenge.title}</h1>
       </header>
+
+      {mock && (
+        <p className="demo-banner">
+          これはデモのサンプルレポートです。実際の面接では、あなたの発話とホワイトボードの内容をもとに
+          AI がこの形式のレポートを生成します。
+          <a href="/">本番の面接を試す（初回1枚無料）</a>
+        </p>
+      )}
 
       {!report && !error && (
         <p className="report-loading">評価レポートを生成しています…</p>

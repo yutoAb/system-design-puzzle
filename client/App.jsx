@@ -4,6 +4,7 @@ import { InterviewScreen } from "./InterviewScreen.jsx";
 import { ReportScreen } from "./ReportScreen.jsx";
 import { useAuth } from "./useAuth.js";
 import { useTickets } from "./useTickets.js";
+import { MOCK_REPORT } from "./mockReport.js";
 
 const isMockMode = new URLSearchParams(window.location.search).has("mock");
 
@@ -114,6 +115,11 @@ export function App() {
   const handleFinished = useCallback(
     async (transcript) => {
       setScreen("report");
+      // デモは未ログインでも完走させたいので、評価 API を呼ばずサンプルを返す
+      if (isMockMode) {
+        setTimeout(() => setReport(MOCK_REPORT), 1200);
+        return;
+      }
       const spokenEntries = transcript.filter(
         (entry) => entry.text.trim() !== ""
       );
@@ -194,6 +200,7 @@ export function App() {
         error={reportError}
         challenge={activeChallenge}
         components={components}
+        mock={isMockMode}
         onRestart={handleRestart}
       />
     );
