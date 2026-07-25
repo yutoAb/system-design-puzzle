@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { serializeBoard } from "../src/domain/interview/serializeBoard.js";
 import { Canvas } from "./Canvas.jsx";
+import { MOCK_BOARD_SCRIPT } from "./mockBoardScript.js";
+import { stageKeyMap } from "./ComponentNode.jsx";
 import { Palette } from "./Palette.jsx";
 import { PhaseIndicator } from "./PhaseIndicator.jsx";
 import { Requirements } from "./Requirements.jsx";
@@ -24,6 +26,24 @@ function formatElapsed(seconds) {
   const min = String(Math.floor(seconds / 60)).padStart(2, "0");
   const sec = String(seconds % 60).padStart(2, "0");
   return `${min}:${sec}`;
+}
+
+function buildNode(componentId, position, components) {
+  const component = components.find((item) => item.id === componentId);
+  if (!component) {
+    return null;
+  }
+  return {
+    id: componentId,
+    type: "component",
+    position,
+    data: {
+      componentId,
+      name: component.name,
+      stage: component.stage,
+      stageKey: stageKeyMap[component.stage] ?? "service"
+    }
+  };
 }
 
 export function InterviewScreen({
@@ -89,6 +109,36 @@ export function InterviewScreen({
     }, 2000);
     return () => clearTimeout(timer);
   }, [nodes, edges, status, components, pushBoardSnapshot]);
+
+  // デモでは会話の進行に合わせてピースを自動配置する（この機能の見せ場なので）
+  useEffect(() => {
+    if (!mock || status !== "connected") {
+      return undefined;
+    }
+    const timers = MOCK_BOARD_SCRIPT.map((step) =>
+      setTimeout(() => {
+        const node = buildNode(step.componentId, step.position, components);
+        if (!node) {
+          return;
+        }
+        setNodes((current) =>
+          current.some((item) => item.id === node.id)
+            ? current
+            : [...current, node]
+        );
+        if (!step.edge) {
+          return;
+        }
+        const [source, target] = step.edge;
+        setEdges((current) =>
+          current.some((edge) => edge.id === `${source}-${target}`)
+            ? current
+            : [...current, { id: `${source}-${target}`, source, target, type: "default" }]
+        );
+      }, step.at)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [mock, status, components, setNodes, setEdges]);
 
   const resetBoard = () => {
     setNodes([]);
@@ -164,6 +214,7 @@ export function InterviewScreen({
               setNodes={setNodes}
               setEdges={setEdges}
               components={components}
+              mock={mock}
               onReset={resetBoard}
             />
             <Palette
