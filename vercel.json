@@ -4,6 +4,16 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        { "type": "host", "value": "system-design-puzzle.vercel.app" }
+      ],
+      "destination": "https://interview.yutoabe.com/:path*",
+      "permanent": true
+    }
+  ],
   "functions": {
     "api/evaluate-interview.js": {
       "maxDuration": 60

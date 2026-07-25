@@ -1,9 +1,10 @@
 project_id = "system-design-puzzle"
 
 [auth]
-site_url = "https://system-design-puzzle.vercel.app"
+site_url = "https://interview.yutoabe.com"
 additional_redirect_urls = [
   "http://localhost:5173",
+  "https://interview.yutoabe.com",
   "https://system-design-puzzle.vercel.app"
 ]
 
