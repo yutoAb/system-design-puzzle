@@ -862,3 +862,122 @@ button:disabled {
   color: #18201c;
   font-weight: 400;
 }
+
+/* ランディング上部: 説明と実際の画面を横に並べる */
+.pitch-hero {
+  align-items: center;
+  display: grid;
+  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  max-width: 1280px;
+}
+
+.pitch-hero h1 {
+  font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+}
+
+.pitch-preview {
+  display: block;
+}
+
+.pitch-preview img {
+  border: 2px solid #29322d;
+  border-radius: 8px;
+  box-shadow: 6px 6px 0 #29322d;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+@media (max-width: 1000px) {
+  .pitch-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 面接画面は1画面に収め、ホワイトボードを見るのにスクロールさせない */
+@media (min-width: 901px) {
+  .interview-screen {
+    height: 100vh;
+    min-height: 640px;
+  }
+
+  .interview-body {
+    overflow: hidden;
+  }
+
+  .interview-body .workspace {
+    align-content: stretch;
+    min-height: 0;
+  }
+
+  .interview-body .canvas-wrap {
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .interview-body .canvas {
+    height: auto;
+  }
+
+  .interview-body .palette {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .interview-body .palette-list {
+    flex: 1;
+    max-height: none;
+    min-height: 0;
+  }
+
+  .interview-body .transcript-panel {
+    max-height: none;
+  }
+}
+
+.report-keep-note {
+  color: #5c6660;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+  padding: 0 32px;
+  text-align: center;
+}
+
+.report-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .intro {
+    padding: 20px;
+  }
+
+  .challenge-cards {
+    padding: 20px;
+  }
+
+  .account-bar {
+    flex-wrap: wrap;
+  }
+}
+
+@media print {
+  .report-actions,
+  .report-keep-note,
+  .report-reference,
+  .demo-banner {
+    display: none;
+  }
+
+  .report-section,
+  .report-grade {
+    break-inside: avoid;
+  }
+}
+
+/* display: flex が hidden 属性を上書きしてしまうため明示する */
+.duration-toggle[hidden] {
+  display: none;
+}

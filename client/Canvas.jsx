@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   Background,
   Controls,
-  MiniMap,
   ReactFlow,
   addEdge,
   applyEdgeChanges,
@@ -156,7 +155,6 @@ export function Canvas({
         >
           <Background gap={24} color="#d7ece4" />
           <Controls position="bottom-left" />
-          <MiniMap pannable zoomable />
         </ReactFlow>
       </div>
     </div>
