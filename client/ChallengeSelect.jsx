@@ -70,10 +70,34 @@ export function ChallengeSelect({
         <p className="eyebrow">システム設計 模擬面接</p>
         {showPitch ? (
           <>
-            <h1>AI面接官と音声で、システム設計面接の練習を。</h1>
-            <p className="prompt">
-              お題を選ぶと、AI面接官との音声面接が始まります。ホワイトボードにアーキテクチャを描きながら会話し、終了後にその場で評価レポートが出ます。読むだけの対策と違って、実際に説明する練習ができます。
-            </p>
+            <div className="pitch-hero">
+              <div>
+                <h1>AI面接官と音声で、システム設計面接の練習を。</h1>
+                <p className="prompt">
+                  お題を選ぶと、AI面接官との音声面接が始まります。ホワイトボードにアーキテクチャを描きながら会話し、終了後にその場で評価レポートが出ます。読むだけの対策と違って、実際に説明する練習ができます。
+                </p>
+                <div className="pitch-actions">
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={auth.signInWithGoogle}
+                  >
+                    Googleでログインして始める
+                  </button>
+                  <a className="demo-link" href="?mock=1">
+                    ログインなしでデモを見る
+                  </a>
+                </div>
+              </div>
+              <a className="pitch-preview" href="?mock=1">
+                <img
+                  src="/preview.jpg"
+                  width="1250"
+                  height="834"
+                  alt="面接画面。左に要件と会話ログ、中央にアーキテクチャを描くホワイトボード、右に設計ピースが並ぶ"
+                />
+              </a>
+            </div>
             <ol className="pitch-steps">
               {STEPS.map((item) => (
                 <li key={item.step}>
@@ -83,18 +107,6 @@ export function ChallengeSelect({
                 </li>
               ))}
             </ol>
-            <div className="pitch-actions">
-              <button
-                type="button"
-                className="primary"
-                onClick={auth.signInWithGoogle}
-              >
-                Googleでログインして始める
-              </button>
-              <a className="demo-link" href="?mock=1">
-                ログインなしでデモを見る
-              </a>
-            </div>
             <p className="pitch-note">
               登録時にチケットを1枚お渡しするので、初回は無料で面接できます。以降は面接1回につきチケット1枚（1枚
               ¥1,500 ／ 5枚パック ¥6,000）。マイクが使える PC 版の Chrome / Edge /
@@ -110,10 +122,16 @@ export function ChallengeSelect({
             </p>
           </>
         )}
-        {startBlockedReason && (
+        {/* 未ログイン時はランディングの案内で足りるので、警告と時間切替は出さない */}
+        {startBlockedReason && !showPitch && (
           <p className="start-blocked">{startBlockedReason}</p>
         )}
-        <div className="duration-toggle" role="radiogroup" aria-label="面接時間">
+        <div
+          className="duration-toggle"
+          role="radiogroup"
+          aria-label="面接時間"
+          hidden={showPitch}
+        >
           <label className={durationMode === "short" ? "active" : ""}>
             <input
               type="radio"
@@ -141,14 +159,24 @@ export function ChallengeSelect({
           <article key={challenge.id} className="challenge-card">
             <h2>{challenge.title}</h2>
             <p>{challenge.prompt}</p>
-            <button
-              type="button"
-              className="primary"
-              disabled={Boolean(startBlockedReason)}
-              onClick={() => onStart(challenge.id, durationMode)}
-            >
-              {mock ? "この課題のデモを見る" : "この課題で面接を始める"}
-            </button>
+            {showPitch ? (
+              <button
+                type="button"
+                className="primary"
+                onClick={auth.signInWithGoogle}
+              >
+                ログインしてこの課題に挑戦する
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="primary"
+                disabled={Boolean(startBlockedReason)}
+                onClick={() => onStart(challenge.id, durationMode)}
+              >
+                {mock ? "この課題のデモを見る" : "この課題で面接を始める"}
+              </button>
+            )}
           </article>
         ))}
       </div>

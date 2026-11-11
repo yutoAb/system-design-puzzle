@@ -2,6 +2,34 @@ import { useState } from "react";
 import { INTERVIEW_PHASES } from "../src/domain/interview/phases.js";
 import { ReferenceView } from "./ReferenceView.jsx";
 
+// レポートを Markdown にして、メモアプリなどへ貼り付けられるようにする
+function reportToMarkdown(report, challenge) {
+  const lines = [
+    `# システム設計 模擬面接の結果: ${challenge.title}`,
+    "",
+    `**総合評価: ${report.overallGrade}**`,
+    "",
+    report.summary,
+    "",
+    "## 良かった点",
+    ...report.strengths.map((item) => `- ${item}`),
+    "",
+    "## 改善点",
+    ...report.improvements.map((item) => `- ${item}`),
+    "",
+    "## 概念カバレッジ",
+    ...report.conceptCoverage.map(
+      (item) => `- ${item.covered ? "✓" : "✗"} ${item.concept}: ${item.evidence}`
+    ),
+    "",
+    "## フェーズ別フィードバック",
+    ...report.phaseFeedback.map(
+      (item) => `- **${phaseLabel(item.phase)}**: ${item.comment}`
+    )
+  ];
+  return lines.join("\n");
+}
+
 function phaseLabel(phaseId) {
   return (
     INTERVIEW_PHASES.find((phase) => phase.id === phaseId)?.label ?? phaseId
@@ -18,6 +46,17 @@ export function ReportScreen({
   onRestart
 }) {
   const [showReference, setShowReference] = useState(false);
+  const [copyState, setCopyState] = useState("idle"); // idle | copied | failed
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(reportToMarkdown(report, challenge));
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+    setTimeout(() => setCopyState("idle"), 2500);
+  };
 
   return (
     <div className="report-screen">
@@ -35,7 +74,9 @@ export function ReportScreen({
       )}
 
       {!report && !error && (
-        <p className="report-loading">評価レポートを生成しています…</p>
+        <p className="report-loading">
+          評価レポートを生成しています…（30秒ほどかかることがあります）
+        </p>
       )}
 
       {error && (
@@ -110,7 +151,36 @@ export function ReportScreen({
         </div>
       )}
 
+      {report && !mock && (
+        <p className="report-keep-note">
+          このレポートはページを離れると消えます。残しておきたい場合は、コピーか PDF
+          保存をご利用ください。
+        </p>
+      )}
+
       <div className="report-actions">
+        {report && (
+          <>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleCopy}
+            >
+              {copyState === "copied"
+                ? "コピーしました"
+                : copyState === "failed"
+                  ? "コピーできませんでした"
+                  : "結果をコピー"}
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => window.print()}
+            >
+              印刷 / PDF保存
+            </button>
+          </>
+        )}
         <button
           type="button"
           className="secondary-button"
