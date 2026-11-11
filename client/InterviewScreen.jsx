@@ -72,6 +72,7 @@ export function InterviewScreen({
   } = useRealtimeInterview({ onEnded: onFinished });
 
   const [elapsed, setElapsed] = useState(0);
+  const [confirmingEnd, setConfirmingEnd] = useState(false);
   const lastSnapshotRef = useRef("");
   const maxSeconds = MAX_SECONDS[durationMode] ?? MAX_SECONDS.full;
   const remaining = maxSeconds - elapsed;
@@ -109,6 +110,19 @@ export function InterviewScreen({
     }, 2000);
     return () => clearTimeout(timer);
   }, [nodes, edges, status, components, pushBoardSnapshot]);
+
+  // 面接中の離脱はチケットも結果も失うので、タブを閉じる前に確認を出す
+  useEffect(() => {
+    if (mock || (status !== "connected" && status !== "connecting")) {
+      return undefined;
+    }
+    const warn = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [mock, status]);
 
   // デモでは会話の進行に合わせてピースを自動配置する（この機能の見せ場なので）
   useEffect(() => {
@@ -176,6 +190,26 @@ export function InterviewScreen({
             >
               {mock ? "デモを再生する" : "マイクをオンにして面接開始"}
             </button>
+          ) : confirmingEnd && status === "connected" ? (
+            <>
+              <span className="end-confirm-text">
+                面接を終了して評価に進みますか？
+              </span>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setConfirmingEnd(false)}
+              >
+                続ける
+              </button>
+              <button
+                type="button"
+                className="danger-button"
+                onClick={endInterview}
+              >
+                終了して評価へ
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -189,8 +223,8 @@ export function InterviewScreen({
               <button
                 type="button"
                 className="danger-button"
-                onClick={endInterview}
-                disabled={status === "ended"}
+                onClick={() => setConfirmingEnd(true)}
+                disabled={status !== "connected"}
               >
                 面接終了
               </button>

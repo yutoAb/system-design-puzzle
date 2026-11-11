@@ -10,9 +10,47 @@ const END_MAX_WAIT_MS = 90000; // 締めの音声がどれだけ長くても最�
 const END_NO_AUDIO_MS = 5000; // 音声が再生されないまま終わるケースの待ち時間
 const END_TAIL_MS = 1000; // stopped 後、クライアント側の再生残りを待つ
 
-async function connectWebRtc({ clientSecret, model, onEvent, audioElement }) {
-  const media = await navigator.mediaDevices.getUserMedia({ audio: true });
+// マイクが使えない理由を、利用者が次に何をすればよいか分かる文面にする
+async function requestMicrophone() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error(
+      "このブラウザではマイクを利用できません。PC 版の Chrome / Edge / Safari でお試しください"
+    );
+  }
+  try {
+    return await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (error) {
+    if (error.name === "NotAllowedError" || error.name === "SecurityError") {
+      throw new Error(
+        "マイクの使用が許可されていません。アドレスバーのアイコンからマイクを許可して、もう一度お試しください（チケットは消費されていません）"
+      );
+    }
+    if (error.name === "NotFoundError" || error.name === "OverconstrainedError") {
+      throw new Error(
+        "マイクが見つかりません。マイクを接続してから、もう一度お試しください（チケットは消費されていません）"
+      );
+    }
+    throw new Error(
+      `マイクを開始できませんでした（${error.name}）。他のアプリがマイクを使用していないか確認してください（チケットは消費されていません）`
+    );
+  }
+}
+
+async function connectWebRtc({
+  media,
+  clientSecret,
+  model,
+  onEvent,
+  onConnectionLost,
+  audioElement
+}) {
   const peer = new RTCPeerConnection();
+  // "disconnected" は一時的な瞬断でも出るので、復旧不能な "failed" だけを扱う
+  peer.onconnectionstatechange = () => {
+    if (peer.connectionState === "failed") {
+      onConnectionLost?.();
+    }
+  };
   media.getTracks().forEach((track) => peer.addTrack(track, media));
   peer.ontrack = (event) => {
     if (audioElement) {
@@ -50,9 +88,10 @@ async function connectWebRtc({ clientSecret, model, onEvent, audioElement }) {
     }
   );
   if (!sdpResponse.ok) {
-    media.getTracks().forEach((track) => track.stop());
     peer.close();
-    throw new Error(`Realtime 接続に失敗しました (${sdpResponse.status})`);
+    throw new Error(
+      `面接官との接続に失敗しました (${sdpResponse.status})。チケットが消費された場合は、お手数ですがお問い合わせください`
+    );
   }
   await peer.setRemoteDescription({
     type: "answer",
@@ -74,6 +113,7 @@ async function connectWebRtc({ clientSecret, model, onEvent, audioElement }) {
       });
     },
     disconnect() {
+      peer.onconnectionstatechange = null;
       media.getTracks().forEach((track) => track.stop());
       channel.close();
       peer.close();
@@ -124,6 +164,9 @@ export function useRealtimeInterview({ onEnded }) {
     setStatus("ended");
     onEndedRef.current?.(transcriptRef.current);
   }, [clearEndTimers]);
+
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
 
   const scheduleFinish = useCallback(() => {
     // 締めの音声を言い終えるまで待つ。output_audio_buffer.stopped が来たら終了。
@@ -216,28 +259,40 @@ export function useRealtimeInterview({ onEnded }) {
           await driver.connect({ onEvent: handleServerEvent });
           driverRef.current = driver;
         } else {
-          const headers = { "Content-Type": "application/json" };
-          if (accessToken) {
-            headers.Authorization = `Bearer ${accessToken}`;
+          // セッション発行でチケットが消費されるので、マイクの許可を先に取る
+          // （許可を拒否しただけでチケットが減るのを防ぐ）
+          const media = await requestMicrophone();
+          try {
+            const headers = { "Content-Type": "application/json" };
+            if (accessToken) {
+              headers.Authorization = `Bearer ${accessToken}`;
+            }
+            const sessionResponse = await fetch("/api/realtime-session", {
+              method: "POST",
+              headers,
+              body: JSON.stringify({ challengeId, durationMode })
+            });
+            if (!sessionResponse.ok) {
+              const data = await sessionResponse.json().catch(() => ({}));
+              throw new Error(
+                data.error ??
+                  `セッション発行に失敗しました (${sessionResponse.status})`
+              );
+            }
+            const { clientSecret, model } = await sessionResponse.json();
+            driverRef.current = await connectWebRtc({
+              media,
+              clientSecret,
+              model,
+              onEvent: handleServerEvent,
+              // 切れたら固まらせず、そこまでの内容で評価に進む
+              onConnectionLost: () => finishRef.current?.(),
+              audioElement: audioRef.current
+            });
+          } catch (error) {
+            media.getTracks().forEach((track) => track.stop());
+            throw error;
           }
-          const sessionResponse = await fetch("/api/realtime-session", {
-            method: "POST",
-            headers,
-            body: JSON.stringify({ challengeId, durationMode })
-          });
-          if (!sessionResponse.ok) {
-            const data = await sessionResponse.json().catch(() => ({}));
-            throw new Error(
-              data.error ?? `セッション発行に失敗しました (${sessionResponse.status})`
-            );
-          }
-          const { clientSecret, model } = await sessionResponse.json();
-          driverRef.current = await connectWebRtc({
-            clientSecret,
-            model,
-            onEvent: handleServerEvent,
-            audioElement: audioRef.current
-          });
         }
         setStatus("connected");
       } catch (error) {

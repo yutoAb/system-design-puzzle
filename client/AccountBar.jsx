@@ -1,4 +1,4 @@
-export function AccountBar({ auth, balance, onBuy }) {
+export function AccountBar({ auth, balance, purchasing, onBuy }) {
   if (!auth.enabled) {
     return null;
   }
@@ -19,6 +19,7 @@ export function AccountBar({ auth, balance, onBuy }) {
               <button
                 type="button"
                 className="secondary-button"
+                disabled={purchasing}
                 onClick={() => onBuy("single")}
               >
                 1枚 ¥1,500
@@ -26,6 +27,7 @@ export function AccountBar({ auth, balance, onBuy }) {
               <button
                 type="button"
                 className="secondary-button"
+                disabled={purchasing}
                 onClick={() => onBuy("pack5")}
               >
                 5枚 ¥6,000

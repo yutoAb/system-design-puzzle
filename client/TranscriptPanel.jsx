@@ -1,16 +1,20 @@
 import { useEffect, useRef } from "react";
 
 export function TranscriptPanel({ transcript }) {
-  const bottomRef = useRef(null);
+  const listRef = useRef(null);
 
+  // scrollIntoView だとページ全体まで動いてしまうので、リスト内だけを送る
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const list = listRef.current;
+    if (list) {
+      list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+    }
   }, [transcript]);
 
   return (
     <div className="transcript-panel">
       <h2>会話ログ</h2>
-      <div className="transcript-list">
+      <div className="transcript-list" ref={listRef}>
         {transcript.length === 0 && (
           <p className="panel-copy">面接官の発話がここに表示されます。</p>
         )}
@@ -28,7 +32,6 @@ export function TranscriptPanel({ transcript }) {
             </p>
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
     </div>
   );
