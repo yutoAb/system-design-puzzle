@@ -14,6 +14,7 @@ export function ReportScreen({
   challenge,
   components,
   mock,
+  onRetry,
   onRestart
 }) {
   const [showReference, setShowReference] = useState(false);
@@ -40,6 +41,16 @@ export function ReportScreen({
       {error && (
         <div className="report-error">
           <p>評価レポートを生成できませんでした: {error}</p>
+          {onRetry && (
+            <>
+              <p className="report-error-note">
+                面接の内容は保持されています。チケットを追加で消費せずに再試行できます。
+              </p>
+              <button type="button" className="primary" onClick={onRetry}>
+                もう一度評価する
+              </button>
+            </>
+          )}
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChallengeSelect } from "./ChallengeSelect.jsx";
 import { InterviewScreen } from "./InterviewScreen.jsx";
 import { ReportScreen } from "./ReportScreen.jsx";
@@ -23,6 +23,11 @@ export function App() {
   const [checkoutNotice, setCheckoutNotice] = useState(null);
   const [checkoutReturned, setCheckoutReturned] = useState(false);
   const [purchaseError, setPurchaseError] = useState(null);
+  const [purchasing, setPurchasing] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [canRetryEvaluation, setCanRetryEvaluation] = useState(false);
+  // 評価に失敗しても面接をやり直さずに済むよう、送信内容を保持しておく
+  const evaluationPayloadRef = useRef(null);
 
   // Stripe Checkout からの戻り: クエリを消してから残高反映を待つ
   useEffect(() => {
@@ -65,6 +70,7 @@ export function App() {
   const handleBuy = useCallback(
     async (packId) => {
       setPurchaseError(null);
+      setPurchasing(true);
       try {
         const response = await fetch("/api/create-checkout", {
           method: "POST",
@@ -83,19 +89,32 @@ export function App() {
         window.location.href = data.url;
       } catch (error) {
         setPurchaseError(error.message);
+        // 成功時は Stripe へ遷移するので、戻すのは失敗時だけ
+        setPurchasing(false);
       }
     },
     [auth.accessToken]
   );
 
-  useEffect(() => {
+  const loadInitialState = useCallback(() => {
+    setLoadError(false);
     fetch("/api/initial-state")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(String(response.status));
+        }
+        return response.json();
+      })
       .then((data) => {
         setChallenges(data.challenges);
         setComponents(data.components);
-      });
+      })
+      .catch(() => setLoadError(true));
   }, []);
+
+  useEffect(() => {
+    loadInitialState();
+  }, [loadInitialState]);
 
   const activeChallenge = useMemo(
     () => challenges.find((challenge) => challenge.id === activeChallengeId),
@@ -109,8 +128,38 @@ export function App() {
     setEdges([]);
     setReport(null);
     setReportError(null);
+    setCanRetryEvaluation(false);
+    evaluationPayloadRef.current = null;
     setScreen("interview");
   }, []);
+
+  const runEvaluation = useCallback(async () => {
+    const payload = evaluationPayloadRef.current;
+    if (!payload) {
+      return;
+    }
+    setReport(null);
+    setReportError(null);
+    try {
+      const headers = { "Content-Type": "application/json" };
+      if (auth.accessToken) {
+        headers.Authorization = `Bearer ${auth.accessToken}`;
+      }
+      const response = await fetch("/api/evaluate-interview", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error ?? `評価に失敗しました (${response.status})`);
+      }
+      setReport(data);
+    } catch (error) {
+      setReportError(error.message);
+      setCanRetryEvaluation(true);
+    }
+  }, [auth.accessToken]);
 
   const handleFinished = useCallback(
     async (transcript) => {
@@ -127,40 +176,22 @@ export function App() {
         setReportError("評価できる会話がありませんでした");
         return;
       }
-      try {
-        const headers = { "Content-Type": "application/json" };
-        if (auth.accessToken) {
-          headers.Authorization = `Bearer ${auth.accessToken}`;
+      evaluationPayloadRef.current = {
+        challengeId: activeChallengeId,
+        durationMode,
+        transcript: spokenEntries.map(({ role, text, phase }) => ({
+          role,
+          text,
+          phase
+        })),
+        board: {
+          componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
+          connections: edges.map((edge) => [edge.source, edge.target])
         }
-        const response = await fetch("/api/evaluate-interview", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            challengeId: activeChallengeId,
-            durationMode,
-            transcript: spokenEntries.map(({ role, text, phase }) => ({
-              role,
-              text,
-              phase
-            })),
-            board: {
-              componentIds: [
-                ...new Set(nodes.map((node) => node.data.componentId))
-              ],
-              connections: edges.map((edge) => [edge.source, edge.target])
-            }
-          })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(data.error ?? `評価に失敗しました (${response.status})`);
-        }
-        setReport(data);
-      } catch (error) {
-        setReportError(error.message);
-      }
+      };
+      await runEvaluation();
     },
-    [activeChallengeId, durationMode, nodes, edges, auth.accessToken]
+    [activeChallengeId, durationMode, nodes, edges, runEvaluation]
   );
 
   const handleRestart = useCallback(() => {
@@ -172,8 +203,19 @@ export function App() {
     tickets.refresh();
   }, [tickets.refresh]);
 
+  if (loadError) {
+    return (
+      <div className="app-status">
+        <p>お題を読み込めませんでした。通信状況を確認して、もう一度お試しください。</p>
+        <button type="button" className="primary" onClick={loadInitialState}>
+          再読み込み
+        </button>
+      </div>
+    );
+  }
+
   if (challenges.length === 0) {
-    return <p style={{ padding: 32 }}>読み込み中…</p>;
+    return <p className="app-status">読み込み中…</p>;
   }
 
   if (screen === "interview" && activeChallenge) {
@@ -201,6 +243,7 @@ export function App() {
         challenge={activeChallenge}
         components={components}
         mock={isMockMode}
+        onRetry={canRetryEvaluation ? runEvaluation : undefined}
         onRestart={handleRestart}
       />
     );
@@ -214,6 +257,7 @@ export function App() {
       mock={isMockMode}
       notice={checkoutNotice}
       purchaseError={purchaseError}
+      purchasing={purchasing}
       onBuy={handleBuy}
       onStart={handleStart}
     />

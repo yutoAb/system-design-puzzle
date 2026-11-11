@@ -31,6 +31,7 @@ export function ChallengeSelect({
   mock,
   notice,
   purchaseError,
+  purchasing,
   onBuy,
   onStart
 }) {
@@ -52,7 +53,12 @@ export function ChallengeSelect({
   return (
     <div className="select-screen">
       <header className="intro">
-        <AccountBar auth={auth} balance={balance} onBuy={onBuy} />
+        <AccountBar
+          auth={auth}
+          balance={balance}
+          purchasing={purchasing}
+          onBuy={onBuy}
+        />
         {notice && <p className="checkout-notice">{notice}</p>}
         {purchaseError && <p className="start-blocked">{purchaseError}</p>}
         {mock && (
