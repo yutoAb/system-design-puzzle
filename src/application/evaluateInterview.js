@@ -14,7 +14,8 @@ export function createEvaluateInterview({
     challengeId,
     transcript,
     board,
-    language
+    language,
+    injectedFailures
   }) {
     const interviewLanguage = normalizeLanguage(language);
     const challenge = challengeRepository.findById(challengeId);
@@ -25,15 +26,21 @@ export function createEvaluateInterview({
       throw new Error("transcript is required");
     }
 
-    const boardText = serializeBoard(
-      board,
-      localizeComponents(componentRepository.findAll(), interviewLanguage)
+    const componentCatalog = localizeComponents(
+      componentRepository.findAll(),
+      interviewLanguage
     );
+    const boardText = serializeBoard(board, componentCatalog);
+    // クライアントから来る値なので、既知のコンポーネントだけを名前に直して使う
+    const failureNames = (Array.isArray(injectedFailures) ? injectedFailures : [])
+      .map((id) => componentCatalog.find((component) => component.id === id)?.name)
+      .filter(Boolean)
+      .slice(0, 5);
     const { input, jsonSchema } = buildEvaluationPrompt(
       challenge,
       transcript,
       boardText,
-      { language: interviewLanguage }
+      { language: interviewLanguage, injectedFailures: failureNames }
     );
 
     return openAiClient.createStructuredResponse({

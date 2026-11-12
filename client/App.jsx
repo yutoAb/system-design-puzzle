@@ -169,7 +169,7 @@ export function App() {
   }, [auth.accessToken]);
 
   const handleFinished = useCallback(
-    async (transcript) => {
+    async (transcript, meta) => {
       setScreen("report");
       // デモは未ログインでも完走させたいので、評価 API を呼ばずサンプルを返す
       if (isMockMode) {
@@ -196,7 +196,8 @@ export function App() {
           componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
           connections: edges.map((edge) => [edge.source, edge.target]),
           notes
-        }
+        },
+        injectedFailures: meta?.injectedFailures ?? []
       };
       await runEvaluation();
     },

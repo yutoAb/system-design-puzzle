@@ -41,11 +41,15 @@ const SCRIPT = [
   [12000, functionCall("advance_phase", { phase: "deep_dive" })],
   [13500, assistantSpeech("m6", "読み取り経路がボトルネックになった場合、どう対処しますか？")],
   [15500, userSpeech("m7", "キャッシュとDBレプリカで読み取りをスケールさせます。")],
-  [17000, functionCall("advance_phase", { phase: "wrap_up" })],
-  [18500, assistantSpeech("m8", "本日はありがとうございました。全体像の説明が明快でした。以上で面接を終了します。")],
-  [18600, { type: "output_audio_buffer.started" }],
-  [20500, functionCall("end_interview", {})],
-  [23000, { type: "output_audio_buffer.stopped" }]
+  // 障害注入: 置いたばかりのキャッシュを落として受け答えを見る（この機能の見せ場）
+  [18000, functionCall("inject_failure", { componentId: "cache" })],
+  [18400, assistantSpeech("m8", "ここで障害を起こします。いまキャッシュが停止しました。利用者には何が起きますか？")],
+  [21000, userSpeech("m9", "読み取りがDBレプリカに集中するので、レート制限で守りつつキャッシュを復旧させます。")],
+  [23000, functionCall("advance_phase", { phase: "wrap_up" })],
+  [24500, assistantSpeech("m10", "本日はありがとうございました。障害時の考え方まで説明できていました。以上で面接を終了します。")],
+  [24600, { type: "output_audio_buffer.started" }],
+  [26500, functionCall("end_interview", {})],
+  [29000, { type: "output_audio_buffer.stopped" }]
 ];
 
 export function createMockRealtimeDriver() {
