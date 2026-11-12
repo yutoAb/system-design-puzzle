@@ -144,4 +144,22 @@ describe("interviewController tickets", () => {
     const me = await controller.me("mock-token");
     assert.equal(me.balance, 1);
   });
+
+  it("health reports ok when the ticket store answers, without Supabase too", async () => {
+    process.env.MOCK_AUTH = "1";
+    const mocked = createInterviewController();
+    assert.deepEqual(await mocked.health(), {
+      ok: true,
+      checks: { database: "ok" }
+    });
+
+    delete process.env.MOCK_AUTH;
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SECRET_KEY;
+    const bare = createInterviewController();
+    assert.deepEqual(await bare.health(), {
+      ok: true,
+      checks: { database: "not_configured" }
+    });
+  });
 });

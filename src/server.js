@@ -23,6 +23,11 @@ const server = createServer(async (request, response) => {
       return sendJson(response, 200, interviewController.initialState());
     }
 
+    if (request.url === "/api/health" && request.method === "GET") {
+      const result = await interviewController.health();
+      return sendJson(response, result.ok ? 200 : 503, result);
+    }
+
     if (request.url === "/api/me" && request.method === "GET") {
       try {
         const result = await interviewController.me(bearerToken(request));

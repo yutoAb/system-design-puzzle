@@ -23,6 +23,18 @@ export const CHECKOUT_UNAVAILABLE_ERROR = "決済が有効になっていませ�
 export const UNKNOWN_PACK_ERROR = "不明なチケットパックです";
 export { AUTH_ERROR, NO_TICKET_ERROR, WEBHOOK_SIGNATURE_ERROR };
 
+// 残高の照会に使う、実在しない利用者の id（死活確認用。該当行がなく 0 が返る）
+const HEALTH_PROBE_USER_ID = "00000000-0000-0000-0000-000000000000";
+const HEALTH_TIMEOUT_MS = 5000;
+
+function withTimeout(promise, ms) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error("timeout")), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 export function createInterviewController() {
   const challengeRepository = createInMemoryChallengeRepository();
   const componentRepository = createInMemoryComponentRepository();
@@ -76,6 +88,21 @@ export function createInterviewController() {
         challenges: listChallenges(),
         components: listComponents()
       };
+    },
+    // 外形監視用。DB まで実際に届くかを確かめる（理由の詳細は外に出さない）
+    async health() {
+      if (!ticketGateway) {
+        return { ok: true, checks: { database: "not_configured" } };
+      }
+      try {
+        await withTimeout(
+          ticketGateway.getBalance(HEALTH_PROBE_USER_ID),
+          HEALTH_TIMEOUT_MS
+        );
+        return { ok: true, checks: { database: "ok" } };
+      } catch {
+        return { ok: false, checks: { database: "unreachable" } };
+      }
     },
     async me(authToken) {
       if (!authGateway) {

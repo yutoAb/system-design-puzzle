@@ -1,0 +1,25 @@
+name: Healthcheck
+
+# 本番がログイン基盤（DB）まで届くかを毎日確かめる。
+# 失敗するとリポジトリの通知でメールが届く。DB を毎日読むので、
+# 利用がない期間に無料プランのプロジェクトが自動停止するのも防ぎやすくなる。
+on:
+  schedule:
+    - cron: "17 0 * * *" # 毎日 09:17 JST
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /api/health
+        run: |
+          status=$(curl -sS -m 30 -o body.json -w '%{http_code}' https://interview.yutoabe.com/api/health)
+          cat body.json
+          echo
+          if [ "$status" != "200" ]; then
+            echo "::error::本番の /api/health が $status を返しました。Supabase のプロジェクトが停止していないか確認してください。"
+            exit 1
+          fi
