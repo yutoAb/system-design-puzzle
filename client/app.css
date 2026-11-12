@@ -1126,3 +1126,112 @@ button:disabled {
   filter: grayscale(1);
   opacity: 0.6;
 }
+
+/* これまでの結果 */
+.history-panel {
+  margin: 0 auto;
+  max-width: 960px;
+  padding: 0 32px;
+}
+
+.history-heading {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+}
+
+.history-heading h2 {
+  font-size: 1.2rem;
+  margin: 0 0 4px;
+}
+
+button.link-button {
+  background: none;
+  border: none;
+  color: #5c6660;
+  font-size: 0.85rem;
+  font-weight: 400;
+  min-height: 0;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.weak-concepts {
+  background: #ffffff;
+  border: 2px solid #29322d;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+
+.weak-concepts h3 {
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+
+.weak-concepts ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.weak-concepts li {
+  align-items: baseline;
+  background: #fbe3df;
+  border-radius: 999px;
+  display: flex;
+  gap: 8px;
+  padding: 4px 12px;
+}
+
+.weak-concepts span {
+  color: #5c6660;
+  font-size: 0.8rem;
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.history-list button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #b5c2bc;
+  color: #18201c;
+  display: flex;
+  font-weight: 400;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.history-list .grade {
+  border-radius: 8px;
+  font-size: 1.1rem;
+  height: 36px;
+  width: 36px;
+}
+
+.history-title {
+  display: grid;
+  gap: 2px;
+}
+
+.history-title small {
+  color: #5c6660;
+}
+
+.history-confirm {
+  align-items: baseline;
+  color: #b3372a;
+  display: flex;
+  font-size: 0.85rem;
+  gap: 12px;
+}

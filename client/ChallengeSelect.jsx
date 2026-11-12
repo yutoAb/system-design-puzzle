@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AccountBar } from "./AccountBar.jsx";
+import { HistoryPanel } from "./HistoryPanel.jsx";
 
 const STEPS = [
   {
@@ -32,6 +33,9 @@ export function ChallengeSelect({
   notice,
   purchaseError,
   purchasing,
+  history,
+  onOpenHistory,
+  onClearHistory,
   onBuy,
   onStart
 }) {
@@ -239,6 +243,14 @@ export function ChallengeSelect({
           </article>
         ))}
       </div>
+      {!mock && !showPitch && (
+        <HistoryPanel
+          entries={history ?? []}
+          challenges={challenges}
+          onOpen={onOpenHistory}
+          onClear={onClearHistory}
+        />
+      )}
       <footer className="site-footer">
         <nav>
           <a href="/legal/tokushoho.html" target="_blank" rel="noreferrer">

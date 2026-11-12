@@ -5,6 +5,7 @@ import { ReportScreen } from "./ReportScreen.jsx";
 import { useAuth } from "./useAuth.js";
 import { useTickets } from "./useTickets.js";
 import { MOCK_REPORT } from "./mockReport.js";
+import { clearHistory, loadHistory, saveHistoryEntry } from "./historyStore.js";
 
 const isMockMode = new URLSearchParams(window.location.search).has("mock");
 
@@ -23,6 +24,14 @@ export function App() {
   const [reportError, setReportError] = useState(null);
   const auth = useAuth();
   const tickets = useTickets(auth.accessToken);
+  const [history, setHistory] = useState([]);
+  // 過去の結果を開いているあいだは、保存の案内や再評価を出さない
+  const [viewingHistory, setViewingHistory] = useState(false);
+  const userId = auth.user?.id ?? null;
+
+  useEffect(() => {
+    setHistory(isMockMode ? [] : loadHistory(userId));
+  }, [userId]);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
   const [checkoutReturned, setCheckoutReturned] = useState(false);
   const [purchaseError, setPurchaseError] = useState(null);
@@ -136,6 +145,7 @@ export function App() {
     setReport(null);
     setReportError(null);
     setCanRetryEvaluation(false);
+    setViewingHistory(false);
     evaluationPayloadRef.current = null;
     setScreen("interview");
   }, []);
@@ -162,11 +172,34 @@ export function App() {
         throw new Error(data.error ?? `評価に失敗しました (${response.status})`);
       }
       setReport(data);
+      setHistory(
+        saveHistoryEntry(userId, {
+          id: `${Date.now()}`,
+          date: new Date().toISOString(),
+          challengeId: payload.challengeId,
+          language: payload.language,
+          strictMode: payload.strictMode,
+          report: data
+        })
+      );
     } catch (error) {
       setReportError(error.message);
       setCanRetryEvaluation(true);
     }
-  }, [auth.accessToken]);
+  }, [auth.accessToken, userId]);
+
+  const handleOpenHistory = useCallback((entry) => {
+    setActiveChallengeId(entry.challengeId);
+    setReport(entry.report);
+    setReportError(null);
+    setCanRetryEvaluation(false);
+    setViewingHistory(true);
+    setScreen("report");
+  }, []);
+
+  const handleClearHistory = useCallback(() => {
+    setHistory(clearHistory(userId));
+  }, [userId]);
 
   const handleFinished = useCallback(
     async (transcript, meta) => {
@@ -187,6 +220,7 @@ export function App() {
         challengeId: activeChallengeId,
         durationMode,
         language,
+        strictMode,
         transcript: spokenEntries.map(({ role, text, phase }) => ({
           role,
           text,
@@ -201,7 +235,7 @@ export function App() {
       };
       await runEvaluation();
     },
-    [activeChallengeId, durationMode, language, nodes, edges, notes, runEvaluation]
+    [activeChallengeId, durationMode, language, strictMode, nodes, edges, notes, runEvaluation]
   );
 
   const handleRestart = useCallback(() => {
@@ -210,6 +244,7 @@ export function App() {
     setEdges([]);
     setReport(null);
     setReportError(null);
+    setViewingHistory(false);
     tickets.refresh();
   }, [tickets.refresh]);
 
@@ -257,6 +292,8 @@ export function App() {
         challenge={activeChallenge}
         components={components}
         mock={isMockMode}
+        saved={!isMockMode}
+        fromHistory={viewingHistory}
         onRetry={canRetryEvaluation ? runEvaluation : undefined}
         onRestart={handleRestart}
       />
@@ -272,6 +309,9 @@ export function App() {
       notice={checkoutNotice}
       purchaseError={purchaseError}
       purchasing={purchasing}
+      history={history}
+      onOpenHistory={handleOpenHistory}
+      onClearHistory={handleClearHistory}
       onBuy={handleBuy}
       onStart={handleStart}
     />
