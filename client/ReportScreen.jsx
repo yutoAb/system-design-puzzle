@@ -55,6 +55,8 @@ export function ReportScreen({
   challenge,
   components,
   mock,
+  saved,
+  fromHistory,
   onRetry,
   onRestart
 }) {
@@ -74,7 +76,7 @@ export function ReportScreen({
   return (
     <div className="report-screen">
       <header className="intro">
-        <p className="eyebrow">面接結果</p>
+        <p className="eyebrow">{fromHistory ? "過去の面接結果" : "面接結果"}</p>
         <h1>{challenge.title}</h1>
       </header>
 
@@ -187,10 +189,11 @@ export function ReportScreen({
         </div>
       )}
 
-      {report && !mock && (
+      {report && !mock && !fromHistory && (
         <p className="report-keep-note">
-          このレポートはページを離れると消えます。残しておきたい場合は、コピーか PDF
-          保存をご利用ください。
+          {saved
+            ? "このレポートはこのブラウザに保存され、お題選択の「これまでの結果」から開けます。他の端末には引き継がれません。"
+            : "このレポートはページを離れると消えます。残しておきたい場合は、コピーか PDF 保存をご利用ください。"}
         </p>
       )}
 
