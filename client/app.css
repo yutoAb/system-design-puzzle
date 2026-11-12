@@ -981,3 +981,48 @@ button:disabled {
 .duration-toggle[hidden] {
   display: none;
 }
+
+/* 英語モード */
+.language-note {
+  color: #4a554e;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin: 12px 0 0;
+  max-width: 760px;
+}
+
+.english-phrases {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.english-phrases li {
+  border-left: 4px solid #9db8ad;
+  padding: 4px 12px;
+}
+
+.english-phrases p {
+  margin: 0 0 4px;
+}
+
+.phrase-said {
+  color: #5c6660;
+}
+
+.phrase-better {
+  font-weight: 700;
+}
+
+.english-phrases small,
+.english-caveat {
+  color: #5c6660;
+  font-size: 0.85rem;
+}
+
+.english-caveat {
+  margin: 16px 0 0;
+}

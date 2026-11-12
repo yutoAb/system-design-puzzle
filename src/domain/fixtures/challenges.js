@@ -16,6 +16,21 @@ export const videoStreamingChallenge = {
     "授業開始直後の数分間にアクセスが集中する（0→50万への急増）。",
     "再生開始までの待ち時間を全国どの地域でも2秒以内に抑えることを目標とする。"
   ],
+  en: {
+    title: "Live Lecture Streaming for an Online Prep School",
+    prompt:
+      "Design an online prep school for students across the country. A live lecture by a popular teacher can attract up to 500,000 concurrent viewers, and each lecture is available as an archive after it ends.",
+    functionalRequirements: [
+      "Members can watch live lectures in real time.",
+      "After a lecture ends, members can watch the same lecture as a recorded archive.",
+      "An API returns the lecture list, start times, and viewing permissions by membership tier."
+    ],
+    nonFunctionalRequirements: [
+      "Withstand a peak of 500,000 concurrent viewers for popular lectures.",
+      "Traffic spikes in the first few minutes of a lecture (from 0 to 500,000).",
+      "Target a playback start time of under 2 seconds from anywhere in the country."
+    ]
+  },
   architectureBudget: 70,
   requiredComponentIds: [
     "cdn",
@@ -137,6 +152,21 @@ export const chatServiceChallenge = {
     "オンライン相手への配信遅延は平均500ms以下に抑える。",
     "ゲーム内イベント開催時のメッセージ急増（平常時の10倍）でも落とさない。"
   ],
+  en: {
+    title: "Friend and Guild Chat for a Mobile Game",
+    prompt:
+      "Design a chat feature built into an online mobile game. At peak, 200,000 players stay connected. The feature offers one-on-one chat between friends and guild chat for up to 500 members.",
+    functionalRequirements: [
+      "Players can exchange one-on-one messages with friends.",
+      "Players can exchange messages in the channel of their guild (up to 500 members).",
+      "Messages received while offline are synced as unread at the next login."
+    ],
+    nonFunctionalRequirements: [
+      "Maintain 200,000 persistent connections at peak.",
+      "Keep average delivery latency to online recipients under 500 ms.",
+      "Do not drop messages during in-game events, when volume rises to 10 times the normal level."
+    ]
+  },
   architectureBudget: 60,
   requiredComponentIds: [
     "websocket-gateway",
@@ -244,6 +274,21 @@ export const socialFeedChallenge = {
     "フォロワー100万人超の人気料理家が投稿しても、他の処理を止めない。",
     "フィードの初回表示は100ms以内を目標にする。"
   ],
+  en: {
+    title: "Follow Feed for a Recipe Sharing App",
+    prompt:
+      "Design the home feed of a recipe sharing app. Users follow their favorite cooks, and new recipes from the people they follow appear in chronological order. Popular cooks have more than one million followers.",
+    functionalRequirements: [
+      "Users can post recipes (photos and text).",
+      "The home screen lists new posts from followed users in chronological order.",
+      "Users can keep scrolling down the feed to load older posts."
+    ],
+    nonFunctionalRequirements: [
+      "Traffic peaks before meal preparation (morning and evening), with a read-to-write ratio of about 200:1.",
+      "A post by a cook with over one million followers must not block other processing.",
+      "Target an initial feed load of under 100 ms."
+    ]
+  },
   architectureBudget: 75,
   requiredComponentIds: [
     "load-balancer",

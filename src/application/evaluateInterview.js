@@ -1,4 +1,5 @@
 import { buildEvaluationPrompt } from "../domain/interview/buildEvaluationPrompt.js";
+import { localizeComponents, normalizeLanguage } from "../domain/interview/language.js";
 import { serializeBoard } from "../domain/interview/serializeBoard.js";
 
 export const DEFAULT_EVAL_MODEL = "gpt-5-mini";
@@ -9,7 +10,13 @@ export function createEvaluateInterview({
   openAiClient,
   evalModel = DEFAULT_EVAL_MODEL
 }) {
-  return async function evaluateInterview({ challengeId, transcript, board }) {
+  return async function evaluateInterview({
+    challengeId,
+    transcript,
+    board,
+    language
+  }) {
+    const interviewLanguage = normalizeLanguage(language);
     const challenge = challengeRepository.findById(challengeId);
     if (!challenge) {
       throw new Error(`unknown challenge: ${challengeId}`);
@@ -18,11 +25,15 @@ export function createEvaluateInterview({
       throw new Error("transcript is required");
     }
 
-    const boardText = serializeBoard(board, componentRepository.findAll());
+    const boardText = serializeBoard(
+      board,
+      localizeComponents(componentRepository.findAll(), interviewLanguage)
+    );
     const { input, jsonSchema } = buildEvaluationPrompt(
       challenge,
       transcript,
-      boardText
+      boardText,
+      { language: interviewLanguage }
     );
 
     return openAiClient.createStructuredResponse({

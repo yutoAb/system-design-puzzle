@@ -27,6 +27,19 @@ function reportToMarkdown(report, challenge) {
       (item) => `- **${phaseLabel(item.phase)}**: ${item.comment}`
     )
   ];
+  if (report.englishFeedback) {
+    lines.push(
+      "",
+      "## 英語表現",
+      report.englishFeedback.summary,
+      "",
+      ...report.englishFeedback.phrases.flatMap((item) => [
+        `- 言った表現: ${item.said}`,
+        `  - 言い換え: ${item.better}`,
+        `  - ${item.note}`
+      ])
+    );
+  }
   return lines.join("\n");
 }
 
@@ -148,6 +161,29 @@ export function ReportScreen({
               ))}
             </ul>
           </section>
+
+          {report.englishFeedback && (
+            <section className="report-section">
+              <h2>英語表現</h2>
+              <p>{report.englishFeedback.summary}</p>
+              <ul className="english-phrases">
+                {report.englishFeedback.phrases.map((item, index) => (
+                  <li key={index}>
+                    <p className="phrase-said" lang="en">
+                      {item.said}
+                    </p>
+                    <p className="phrase-better" lang="en">
+                      → {item.better}
+                    </p>
+                    <small>{item.note}</small>
+                  </li>
+                ))}
+              </ul>
+              <p className="english-caveat">
+                音声認識の書き起こしをもとにした講評のため、発音や細かな文法の誤りは対象外です。
+              </p>
+            </section>
+          )}
         </div>
       )}
 

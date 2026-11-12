@@ -1,4 +1,5 @@
 import { buildInterviewerInstructions } from "../domain/interview/buildInterviewerInstructions.js";
+import { normalizeLanguage } from "../domain/interview/language.js";
 import { realtimeTools } from "../domain/interview/realtimeTools.js";
 
 export const REALTIME_MODEL = "gpt-realtime";
@@ -10,8 +11,10 @@ export function createCreateInterviewSession({
 }) {
   return async function createInterviewSession({
     challengeId,
-    durationMode = "full"
+    durationMode = "full",
+    language
   }) {
+    const interviewLanguage = normalizeLanguage(language);
     const challenge = challengeRepository.findById(challengeId);
     if (!challenge) {
       throw new Error(`unknown challenge: ${challengeId}`);
@@ -20,7 +23,7 @@ export function createCreateInterviewSession({
     const instructions = buildInterviewerInstructions(
       challenge,
       componentRepository.findAll(),
-      { durationMode }
+      { durationMode, language: interviewLanguage }
     );
 
     const secret = await openAiClient.createClientSecret({
@@ -31,7 +34,7 @@ export function createCreateInterviewSession({
         instructions,
         audio: {
           input: {
-            transcription: { model: "gpt-4o-transcribe", language: "ja" },
+            transcription: { model: "gpt-4o-transcribe", language: interviewLanguage },
             turn_detection: { type: "semantic_vad" }
           },
           output: { voice: "marin" }

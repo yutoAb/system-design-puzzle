@@ -1,3 +1,4 @@
+import { localizeChallenge, localizeComponents, normalizeLanguage } from "./language.js";
 import { INTERVIEW_PHASES } from "./phases.js";
 
 const DURATION_GUIDES = {
@@ -35,9 +36,11 @@ const PHASE_BEHAVIORS = {
 export function buildInterviewerInstructions(
   challenge,
   componentCatalog,
-  { durationMode = "full" } = {}
+  { durationMode = "full", language = "ja" } = {}
 ) {
   const guide = DURATION_GUIDES[durationMode] ?? DURATION_GUIDES.full;
+  const english = normalizeLanguage(language) === "en";
+  const brief = localizeChallenge(challenge, language);
 
   const phaseSection = INTERVIEW_PHASES.map((phase) => {
     const behavior = PHASE_BEHAVIORS[phase.id];
@@ -45,7 +48,7 @@ export function buildInterviewerInstructions(
     return `### フェーズ${phase.step}: ${phase.label} (${phase.id}, 目安${time})\n${behavior}`;
   }).join("\n\n");
 
-  const componentNames = componentCatalog
+  const componentNames = localizeComponents(componentCatalog, language)
     .map((component) => component.name)
     .join(" / ");
 
@@ -59,24 +62,36 @@ export function buildInterviewerInstructions(
     .map((rec) => `- ${rec.risk}`)
     .join("\n");
 
-  return `あなたは経験豊富なシステム設計面接の面接官です。日本語で音声面接を行います。
+  // 英語モードでも指示書は日本語のまま（評価メモなどを二重管理しないため）。
+  // 話す言語だけを明示的に切り替える。
+  const opening = english
+    ? "あなたは経験豊富なシステム設計面接の面接官です。英語で音声面接を行います。候補者は、外資系企業の英語面接に向けて練習している日本語話者です。"
+    : "あなたは経験豊富なシステム設計面接の面接官です。日本語で音声面接を行います。";
+  const languageRules = english
+    ? `- 常に英語で話す。この指示書は日本語だが、あなたの発話はすべて自然な英語にする。
+- 実際の英語面接で使われる言い回しで、明瞭に、落ち着いた速度で話す。
+- 候補者が日本語で話した場合も英語で応答し、英語で言い直すよう穏やかに促す。
+- 候補者の英語の誤りは面接中に指摘しない（英語表現の講評は面接後に別途行われる）。意味が取れないときだけ聞き返す。`
+    : "- 常に日本語で話す。英単語は日本語の文脈の中でのみ使う。";
+
+  return `${opening}
 
 # 絶対に守るルール
-- 常に日本語で話す。英単語は日本語の文脈の中でのみ使う。
+${languageRules}
 - 一度に1つの質問だけをする。発話は簡潔に（2〜4文程度）。
 - 答えを教えない。候補者が行き詰まったときだけ小さなヒントを出す。
 - 候補者の発言を遮らず、話し終えるのを待ってから応答する。
 - 面接全体は${guide.total}を目安に進行する。
 
 # お題
-${challenge.title}
-${challenge.prompt}
+${brief.title}
+${brief.prompt}
 
 面接官だけが知っている想定要件（候補者が質問したら開示してよい）:
 機能要件:
-${challenge.functionalRequirements.map((req) => `- ${req}`).join("\n")}
+${brief.functionalRequirements.map((req) => `- ${req}`).join("\n")}
 非機能要件:
-${challenge.nonFunctionalRequirements.map((req) => `- ${req}`).join("\n")}
+${brief.nonFunctionalRequirements.map((req) => `- ${req}`).join("\n")}
 
 # 面接の進行
 面接は次の4フェーズで進める。フェーズを切り替えるときは必ず advance_phase ツールを呼び、そのあと候補者に次のフェーズへ進むことを口頭で伝える。面接開始時にまず自己紹介とお題の説明をして、advance_phase(requirements) を呼ぶこと。
