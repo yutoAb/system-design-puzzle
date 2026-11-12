@@ -305,6 +305,109 @@ function ClientIcon() {
   );
 }
 
+function InferenceServerIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="14" y="14" width="36" height="36" rx="4" fill="#5fa770" stroke="#2f7347" strokeWidth="1.5" />
+      <g stroke="#2f7347" strokeWidth="2" strokeLinecap="round">
+        <path d="M22 8 L22 14 M32 8 L32 14 M42 8 L42 14" />
+        <path d="M22 50 L22 56 M32 50 L32 56 M42 50 L42 56" />
+        <path d="M8 22 L14 22 M8 32 L14 32 M8 42 L14 42" />
+        <path d="M50 22 L56 22 M50 32 L56 32 M50 42 L56 42" />
+      </g>
+      <path d="M27 24 L41 32 L27 40 Z" fill="#ffffff" />
+    </svg>
+  );
+}
+
+function GpuWorkerIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="8" y="20" width="48" height="26" rx="3" fill="#5fa770" stroke="#2f7347" strokeWidth="1.5" />
+      <circle cx="24" cy="33" r="8" fill="#ffffff" stroke="#2f7347" strokeWidth="1.5" />
+      <circle cx="44" cy="33" r="8" fill="#ffffff" stroke="#2f7347" strokeWidth="1.5" />
+      <g stroke="#2f7347" strokeWidth="1.5" strokeLinecap="round">
+        <path d="M24 27 L24 39 M18 33 L30 33" />
+        <path d="M44 27 L44 39 M38 33 L50 33" />
+        <path d="M14 46 L14 52 M22 46 L22 52 M30 46 L30 52" />
+      </g>
+    </svg>
+  );
+}
+
+function AutoscalerIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <g fill="#f4b942" stroke="#b87e1f" strokeWidth="1.5">
+        <rect x="8" y="34" width="14" height="20" rx="2" />
+        <rect x="25" y="24" width="14" height="30" rx="2" />
+        <rect x="42" y="14" width="14" height="40" rx="2" />
+      </g>
+      <path
+        d="M10 24 L24 12 M24 12 L16 12 M24 12 L24 20"
+        fill="none"
+        stroke="#b87e1f"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function JobSchedulerIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="10" y="12" width="44" height="42" rx="4" fill="#b58ad6" stroke="#8a4dbf" strokeWidth="1.5" />
+      <rect x="10" y="12" width="44" height="10" rx="4" fill="#8a4dbf" />
+      <g fill="#ffffff">
+        <rect x="16" y="28" width="20" height="5" rx="1.5" />
+        <rect x="16" y="36" width="30" height="5" rx="1.5" />
+        <rect x="16" y="44" width="14" height="5" rx="1.5" />
+      </g>
+    </svg>
+  );
+}
+
+function ModelRegistryIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path
+        d="M32 8 L54 20 L54 44 L32 56 L10 44 L10 20 Z"
+        fill="#3b7fc1"
+        stroke="#1a5590"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 20 L32 32 L54 20 M32 32 L32 56"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle cx="43" cy="38" r="3" fill="#ffffff" />
+    </svg>
+  );
+}
+
+function MonitoringIcon() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="8" y="12" width="48" height="34" rx="4" fill="#b58ad6" stroke="#8a4dbf" strokeWidth="1.5" />
+      <path
+        d="M14 34 L24 34 L28 22 L34 42 L39 30 L50 30"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M24 54 L40 54 M32 46 L32 54" stroke="#8a4dbf" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export const componentIcons = {
   client: ClientIcon,
   cdn: CdnIcon,
@@ -321,7 +424,13 @@ export const componentIcons = {
   "rate-limiter": RateLimiterIcon,
   "consistent-hash": ConsistentHashIcon,
   "key-value-store": KeyValueStoreIcon,
-  "analytics-pipeline": AnalyticsPipelineIcon
+  "analytics-pipeline": AnalyticsPipelineIcon,
+  "inference-server": InferenceServerIcon,
+  "gpu-worker": GpuWorkerIcon,
+  autoscaler: AutoscalerIcon,
+  "job-scheduler": JobSchedulerIcon,
+  "model-registry": ModelRegistryIcon,
+  monitoring: MonitoringIcon
 };
 
 export function ComponentIcon({ componentId, size = 40 }) {

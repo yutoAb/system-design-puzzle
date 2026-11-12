@@ -74,7 +74,9 @@ export function ReferenceView({ challenge, components }) {
           nodesConnectable={false}
           edgesFocusable={false}
           fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitViewOptions={{ padding: 0.1 }}
+          // 横に長い模範解答も全体が収まるよう、既定（0.5）より引けるようにする
+          minZoom={0.2}
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={24} color="#d7ece4" />

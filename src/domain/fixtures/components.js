@@ -222,5 +222,89 @@ export const componentCatalog = [
       scalability: 5,
       cost: 10
     }
+  },
+  {
+    id: "inference-server",
+    name: "推論サーバー",
+    nameEn: "Inference Server",
+    stage: "サービス",
+    description: "GPU上でモデルを動かし、リクエストをまとめて処理（バッチング）しながら応答を返します。",
+    concepts: ["モデルサービング", "動的バッチング"],
+    effects: {
+      availability: 4,
+      latency: 10,
+      scalability: 10,
+      cost: 14
+    }
+  },
+  {
+    id: "gpu-worker",
+    name: "GPUワーカー",
+    nameEn: "GPU Worker",
+    stage: "サービス",
+    description: "学習ジョブを実行し、途中経過をチェックポイントとして書き出します。",
+    concepts: ["学習ジョブ", "チェックポイント"],
+    effects: {
+      availability: 2,
+      latency: 0,
+      scalability: 10,
+      cost: 16
+    }
+  },
+  {
+    id: "autoscaler",
+    name: "オートスケーラー",
+    nameEn: "Autoscaler",
+    stage: "流量制御",
+    description: "負荷の指標を見て、サーバーの台数を自動で増減させます。",
+    concepts: ["オートスケール", "スケール指標"],
+    effects: {
+      availability: 8,
+      latency: 6,
+      scalability: 16,
+      cost: -6
+    }
+  },
+  {
+    id: "job-scheduler",
+    name: "ジョブスケジューラー",
+    nameEn: "Job Scheduler",
+    stage: "非同期",
+    description: "優先度やクォータに従って、待機中のジョブを空いている計算資源へ割り当てます。",
+    concepts: ["ジョブスケジューリング", "公平性"],
+    effects: {
+      availability: 6,
+      latency: 0,
+      scalability: 12,
+      cost: 4
+    }
+  },
+  {
+    id: "model-registry",
+    name: "モデルレジストリ",
+    nameEn: "Model Registry",
+    stage: "保存",
+    description: "学習済みモデルをバージョン付きで管理し、配信するバージョンの切替や巻き戻しの基点になります。",
+    concepts: ["モデルのバージョン管理", "ロールバック"],
+    effects: {
+      availability: 8,
+      latency: 0,
+      scalability: 4,
+      cost: 3
+    }
+  },
+  {
+    id: "monitoring",
+    name: "メトリクス監視",
+    nameEn: "Metrics & Monitoring",
+    stage: "非同期",
+    description: "遅延・エラー率・資源の使用状況を集め、アラートやスケール判断の材料にします。",
+    concepts: ["可観測性", "SLO"],
+    effects: {
+      availability: 10,
+      latency: 0,
+      scalability: 6,
+      cost: 4
+    }
   }
 ];

@@ -3,6 +3,7 @@
 
 export const videoStreamingChallenge = {
   id: "video-streaming-1m",
+  category: "Webサービス",
   title: "オンライン予備校のライブ授業配信",
   prompt:
     "全国の受験生向けオンライン予備校を設計してください。人気講師のライブ授業には最大50万人が同時アクセスし、授業終了後はアーカイブとして視聴できます。",
@@ -139,6 +140,7 @@ export const videoStreamingChallenge = {
 
 export const chatServiceChallenge = {
   id: "chat-service-100k",
+  category: "Webサービス",
   title: "スマホゲームのフレンド＆ギルドチャット",
   prompt:
     "スマートフォン向けオンラインゲームに組み込むチャット機能を設計してください。ピーク時は20万人が常時接続し、フレンドとの1対1チャットと最大500人のギルドチャットを提供します。",
@@ -261,6 +263,7 @@ export const chatServiceChallenge = {
 
 export const socialFeedChallenge = {
   id: "social-feed-fanout",
+  category: "Webサービス",
   title: "レシピ投稿アプリのフォローフィード",
   prompt:
     "料理レシピ投稿アプリのホームフィードを設計してください。ユーザーは好きな料理家をフォローし、フォロー中の新着レシピが時系列で並びます。人気料理家のフォロワーは100万人を超えます。",
@@ -391,8 +394,296 @@ export const socialFeedChallenge = {
   ]
 };
 
+export const voiceInferenceChallenge = {
+  id: "voice-inference-platform",
+  category: "ML基盤",
+  title: "音声AIアシスタントのリアルタイム推論基盤",
+  prompt:
+    "家電メーカーの音声アシスタント向けに、音声対話モデルをGPUで動かす推論基盤を設計してください。朝と夜の時間帯には最大3万件の対話セッションが同時に走り、モデルは週に数回更新されます。",
+  functionalRequirements: [
+    "端末は音声をストリーミングで送り、応答の音声をストリーミングで受け取れる。",
+    "新しいモデルバージョンへ、サービスを止めずに段階的に切り替えられる。",
+    "モデルバージョンごとの遅延・エラー率・GPUの使用状況を確認できる。"
+  ],
+  nonFunctionalRequirements: [
+    "ピーク時は3万セッションが同時に走り、30分ほどで平常時の5倍まで増える。",
+    "発話の終了から応答音声の再生開始までを、95パーセンタイルで500ms以内に抑える。",
+    "GPUサーバーは、起動してモデルを読み込み終えるまでに約3分かかる。",
+    "深夜の利用はピークの1割以下で、その時間帯のGPU費用を抑えたい。"
+  ],
+  en: {
+    title: "Real-Time Inference Platform for a Voice AI Assistant",
+    prompt:
+      "Design an inference platform that runs a spoken dialogue model on GPUs for a home appliance maker's voice assistant. Up to 30,000 dialogue sessions run concurrently in the morning and evening, and the model is updated several times a week.",
+    functionalRequirements: [
+      "Devices stream audio to the platform and receive the response audio as a stream.",
+      "A new model version can be rolled out gradually without stopping the service.",
+      "Operators can see latency, error rate, and GPU usage for each model version."
+    ],
+    nonFunctionalRequirements: [
+      "At peak, 30,000 sessions run concurrently, and load grows to 5 times the normal level within about 30 minutes.",
+      "Keep the time from end of speech to start of response audio under 500 ms at the 95th percentile.",
+      "A GPU server takes about 3 minutes to boot and finish loading the model.",
+      "Late-night usage is below 10 percent of peak, and GPU cost during those hours should be kept low."
+    ]
+  },
+  architectureBudget: 80,
+  requiredComponentIds: [
+    "load-balancer",
+    "websocket-gateway",
+    "inference-server",
+    "autoscaler",
+    "model-registry"
+  ],
+  recommendedComponentIds: [
+    "monitoring",
+    "rate-limiter",
+    "key-value-store",
+    "queue",
+    "object-storage"
+  ],
+  requiredConnections: [
+    ["websocket-gateway", "inference-server"],
+    ["inference-server", "model-registry"]
+  ],
+  recommendations: [
+    {
+      componentId: "inference-server",
+      strength:
+        "複数セッションの入力をまとめて処理する動的バッチングと、1台あたりの同時セッション数の上限により、GPUの処理量と遅延の釣り合いを制御できます。"
+    },
+    {
+      componentId: "autoscaler",
+      strength:
+        "GPU使用率ではなく同時セッション数や待ち時間を指標にスケールすることで、遅延が悪化する前に台数を増やせます。起動に3分かかる分は、時間帯による先読みや予備の起動済みサーバーで補えます。",
+      risk: "オートスケーラーがないため、朝夕の5倍の増加に人手で対応することになり、深夜も過剰なGPUを抱え続けます。"
+    },
+    {
+      componentId: "model-registry",
+      strength:
+        "モデルレジストリでバージョンを管理することで、一部のセッションだけに新バージョンを当てる段階的な切替と、不具合時の即時の巻き戻しができます。",
+      risk: "モデルレジストリがないため、どのサーバーがどのバージョンを動かしているか追えず、不具合が出ても確実に戻せません。"
+    },
+    {
+      componentId: "monitoring",
+      strength:
+        "バージョン別の遅延とエラー率を監視することで、段階的な切替を自動で止める判断と、スケールの指標の両方に使えます。",
+      risk: "監視がないため、新しいモデルで遅延が悪化しても気づけず、スケールの判断材料もありません。"
+    },
+    {
+      componentId: "rate-limiter",
+      strength:
+        "容量を超えたときに新規セッションの受付を絞ることで、進行中の対話の遅延を守れます。",
+      risk: "流量制御がないため、容量を超えた瞬間に全セッションの遅延が一斉に悪化します。"
+    },
+    {
+      componentId: "key-value-store",
+      strength:
+        "セッションと担当サーバーの対応、対話の状態を保持することで、再接続やサーバー入れ替えの際に同じ対話を続けられます。"
+    },
+    {
+      componentId: "queue",
+      strength:
+        "対話ログや評価用データの書き出しをキューで非同期化し、遅延に厳しい推論の経路から切り離せます。"
+    },
+    {
+      componentId: "object-storage",
+      strength:
+        "モデルの重みをオブジェクトストレージに置き、サーバー側にも保持しておくことで、起動時の読み込み時間を短縮できます。"
+    }
+  ],
+  targetConcepts: [
+    "オートスケール",
+    "スケール指標の選択",
+    "コールドスタート",
+    "動的バッチング",
+    "段階的リリース",
+    "ロールバック",
+    "過負荷時の受付制限",
+    "ストリーミングセッションの振り分け",
+    "GPUコストの最適化",
+    "SLOの監視"
+  ],
+  interviewPrompts: [
+    "図を描く前に、同時セッション数・増加の速さ・遅延の目標・GPU1枚で処理できるセッション数を確認する。",
+    "起動に3分かかる前提で、30分で5倍になる負荷にどう間に合わせるか（指標・先読み・予備のサーバー）を説明する。",
+    "モデルの更新を止めずに行う手順と、不具合が出たときの戻し方を説明する。",
+    "容量を超えたときに何を諦めるか（新規の受付、応答の品質）を説明する。"
+  ],
+  referenceLayout: {
+    "client":            { x: -240, y:  80 },
+    "rate-limiter":      { x:    0, y:  80 },
+    "load-balancer":     { x:  240, y:  80 },
+    "websocket-gateway": { x:  500, y:  80 },
+    "key-value-store":   { x:  800, y: -80 },
+    "inference-server":  { x:  800, y:  80 },
+    "autoscaler":        { x:  500, y: 260 },
+    "model-registry":    { x: 1060, y:   0 },
+    "object-storage":    { x: 1320, y:   0 },
+    "monitoring":        { x: 1060, y: 160 },
+    "queue":             { x: 1060, y: 320 }
+  },
+  referenceConnections: [
+    ["client", "rate-limiter"],
+    ["rate-limiter", "load-balancer"],
+    ["load-balancer", "websocket-gateway"],
+    ["websocket-gateway", "key-value-store"],
+    ["websocket-gateway", "inference-server"],
+    ["autoscaler", "inference-server"],
+    ["inference-server", "model-registry"],
+    ["model-registry", "object-storage"],
+    ["inference-server", "monitoring"],
+    ["inference-server", "queue"]
+  ]
+};
+
+export const trainingJobChallenge = {
+  id: "training-job-platform",
+  category: "ML基盤",
+  title: "研究チーム向けGPU学習ジョブ基盤",
+  prompt:
+    "社内の研究者200人がモデルの学習ジョブを投入する、GPUクラスタの共有基盤を設計してください。GPUは全部で400枚あり、1つのジョブは数分から数日かかります。",
+  functionalRequirements: [
+    "研究者は、使うGPUの枚数と実行内容を指定して学習ジョブを投入できる。",
+    "ジョブの状態（待機・実行中・完了・失敗）とログ、学習の進み具合を確認できる。",
+    "学習の途中経過（チェックポイント）と完成したモデルが保存され、後から同じ結果を再現できる。"
+  ],
+  nonFunctionalRequirements: [
+    "待機中と実行中を合わせて、同時に2,000件のジョブを扱う。",
+    "特定のチームがGPUを独占せず、締切が近いジョブを優先できる。",
+    "GPUサーバーの故障や割り込みが起きても、ジョブは途中から再開できる。",
+    "GPUの稼働率を80%以上に保つ。"
+  ],
+  en: {
+    title: "GPU Training Job Platform for a Research Team",
+    prompt:
+      "Design a shared GPU cluster platform where 200 in-house researchers submit model training jobs. There are 400 GPUs in total, and a single job takes anywhere from a few minutes to several days.",
+    functionalRequirements: [
+      "Researchers can submit a training job by specifying the number of GPUs and what to run.",
+      "Researchers can see job status (queued, running, completed, failed), logs, and training progress.",
+      "Checkpoints and finished models are stored so that the same result can be reproduced later."
+    ],
+    nonFunctionalRequirements: [
+      "Handle 2,000 jobs at a time, counting both queued and running jobs.",
+      "No single team may monopolize the GPUs, and jobs close to a deadline can be prioritized.",
+      "A job can resume from where it stopped after a GPU server failure or an interruption.",
+      "Keep GPU utilization at 80 percent or higher."
+    ]
+  },
+  architectureBudget: 80,
+  requiredComponentIds: [
+    "application-service",
+    "relational-database",
+    "job-scheduler",
+    "gpu-worker",
+    "object-storage"
+  ],
+  recommendedComponentIds: [
+    "queue",
+    "model-registry",
+    "monitoring",
+    "load-balancer",
+    "autoscaler"
+  ],
+  requiredConnections: [
+    ["job-scheduler", "gpu-worker"],
+    ["gpu-worker", "object-storage"]
+  ],
+  recommendations: [
+    {
+      componentId: "job-scheduler",
+      strength:
+        "優先度とチームごとのクォータを見て割り当てるスケジューラーにより、独占を防ぎながら締切が近いジョブを先に流せます。",
+      risk: "スケジューラーがないため、早い者勝ちでGPUが埋まり、大きなジョブがいつまでも始まらない状態になります。"
+    },
+    {
+      componentId: "queue",
+      strength:
+        "投入をキューで受けることで、APIとスケジューラーを切り離し、投入が集中したときやスケジューラーの再起動中でもジョブを失いません。",
+      risk: "キューがないため、スケジューラーが止まっている間の投入が失われるか、APIが詰まります。"
+    },
+    {
+      componentId: "gpu-worker",
+      strength:
+        "定期的にチェックポイントを書き出すワーカーにより、故障や優先ジョブへの明け渡しの後も途中から再開できます。"
+    },
+    {
+      componentId: "object-storage",
+      strength:
+        "データセットとチェックポイントを共有のストレージに置くことで、別のワーカーに移っても同じ地点から再開できます。"
+    },
+    {
+      componentId: "relational-database",
+      strength:
+        "ジョブの状態の変化を1か所に記録することで、ワーカーが応答しなくなったときも二重実行を避けて再実行できます。"
+    },
+    {
+      componentId: "model-registry",
+      strength:
+        "完成したモデルを、コード・データ・設定のバージョンと紐づけて登録することで、後から同じ結果を再現できます。",
+      risk: "モデルレジストリがないため、どのデータと設定で作ったモデルかを後から追えません。"
+    },
+    {
+      componentId: "monitoring",
+      strength:
+        "GPUの稼働率・待ち時間・失敗率をチーム別に見えるようにすることで、クォータの見直しや稼働率の目標の確認ができます。",
+      risk: "監視がないため、稼働率80%の目標を満たしているか、どのチームが待たされているかが分かりません。"
+    },
+    {
+      componentId: "autoscaler",
+      strength:
+        "待ちが長いときだけクラウドのGPUを追加することで、固定の400枚を超える需要を一時的に吸収できます。"
+    }
+  ],
+  targetConcepts: [
+    "ジョブスケジューリング",
+    "優先度とクォータ",
+    "公平性",
+    "実行中ジョブの明け渡し",
+    "チェックポイントと再開",
+    "冪等性",
+    "複数GPUジョブの割り当て",
+    "空きの断片化と稼働率",
+    "再現性",
+    "可観測性"
+  ],
+  interviewPrompts: [
+    "図を描く前に、ジョブの長さと必要なGPU枚数の分布、優先度の決め方を確認する。",
+    "8枚使うジョブと1枚のジョブが混ざるとき、空きの断片化と、大きなジョブが待たされ続ける問題をどう扱うか説明する。",
+    "実行中のジョブを止めて優先ジョブに譲るときの、チェックポイントと再開の流れを説明する。",
+    "ワーカーが応答しなくなったとき、二重実行を避けながら再実行する方法を説明する。"
+  ],
+  referenceLayout: {
+    "client":              { x: -240, y:  80 },
+    "load-balancer":       { x:    0, y:  80 },
+    "application-service": { x:  240, y:  80 },
+    "relational-database": { x:  540, y: -80 },
+    "queue":               { x:  540, y:  80 },
+    "job-scheduler":       { x:  800, y:  80 },
+    "autoscaler":          { x:  800, y: 260 },
+    "gpu-worker":          { x: 1080, y:  80 },
+    "object-storage":      { x: 1340, y: -40 },
+    "model-registry":      { x: 1340, y: 120 },
+    "monitoring":          { x: 1340, y: 280 }
+  },
+  referenceConnections: [
+    ["client", "load-balancer"],
+    ["load-balancer", "application-service"],
+    ["application-service", "relational-database"],
+    ["application-service", "queue"],
+    ["queue", "job-scheduler"],
+    ["job-scheduler", "gpu-worker"],
+    ["autoscaler", "gpu-worker"],
+    ["gpu-worker", "object-storage"],
+    ["gpu-worker", "model-registry"],
+    ["gpu-worker", "monitoring"]
+  ]
+};
+
 export const challenges = [
   videoStreamingChallenge,
   chatServiceChallenge,
-  socialFeedChallenge
+  socialFeedChallenge,
+  voiceInferenceChallenge,
+  trainingJobChallenge
 ];
