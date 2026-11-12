@@ -1235,3 +1235,7 @@ button.link-button {
   font-size: 0.85rem;
   gap: 12px;
 }
+
+.auth-unavailable {
+  margin: 8px 0 16px;
+}

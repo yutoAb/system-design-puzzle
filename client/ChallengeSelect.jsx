@@ -70,6 +70,11 @@ export function ChallengeSelect({
         />
         {notice && <p className="checkout-notice">{notice}</p>}
         {purchaseError && <p className="start-blocked">{purchaseError}</p>}
+        {auth?.unavailable && !mock && (
+          <p className="interview-error auth-unavailable" role="alert">
+            ログインのサービスに接続できません。時間をおいてもう一度お試しください。デモは引き続きご覧いただけます。
+          </p>
+        )}
         {mock && (
           <p className="demo-banner">
             デモモードです。面接官の応答はあらかじめ用意した台本で、マイクは使いません（約30秒で終わります）。
