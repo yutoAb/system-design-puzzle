@@ -117,7 +117,7 @@ export function buildEvaluationPrompt(
   challenge,
   transcript,
   boardText,
-  { language = "ja" } = {}
+  { language = "ja", injectedFailures = [] } = {}
 ) {
   const english = normalizeLanguage(language) === "en";
   const brief = localizeChallenge(challenge, language);
@@ -153,7 +153,15 @@ ${risks}
 # 最終的なホワイトボード
 ${boardText}
 
-# 面接の書き起こし
+${
+    injectedFailures.length > 0
+      ? `# 面接中に注入した障害
+面接官は深掘りの中で次のコンポーネントを故障させ、影響と対処を質問した: ${injectedFailures.join("、")}
+その受け答え（影響範囲の把握、検知、復旧、縮退運転）を deep_dive の phaseFeedback で必ず講評すること。
+
+`
+      : ""
+  }# 面接の書き起こし
 ${formatTranscript(transcript)}
 
 評価は厳しすぎず甘すぎず、実際の面接フィードバックとして役立つ具体性を持たせること。候補者の発言に根拠を求め、ホワイトボードだけで判断しないこと。${

@@ -130,11 +130,14 @@ export function useRealtimeInterview({ onEnded }) {
   const [transcript, setTranscript] = useState([]);
   const [micMuted, setMicMuted] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  // 面接官が「落とした」コンポーネント（障害注入）。画面で赤く見せる
+  const [failedComponentId, setFailedComponentId] = useState(null);
 
   const driverRef = useRef(null);
   const phaseRef = useRef(null);
   const transcriptRef = useRef([]);
   const audioRef = useRef(null);
+  const injectedFailuresRef = useRef([]);
   const endedRef = useRef(false);
   const pendingEndRef = useRef(false);
   const audioPlayingRef = useRef(false);
@@ -162,7 +165,9 @@ export function useRealtimeInterview({ onEnded }) {
     driverRef.current?.disconnect();
     driverRef.current = null;
     setStatus("ended");
-    onEndedRef.current?.(transcriptRef.current);
+    onEndedRef.current?.(transcriptRef.current, {
+      injectedFailures: injectedFailuresRef.current
+    });
   }, [clearEndTimers]);
 
   const finishRef = useRef(finish);
@@ -206,16 +211,29 @@ export function useRealtimeInterview({ onEnded }) {
           (item) => item.type === "function_call"
         );
         for (const call of calls) {
-          if (call.name === "advance_phase") {
-            let args = {};
-            try {
-              args = JSON.parse(call.arguments ?? "{}");
-            } catch {
-              // 引数が壊れていたらフェーズ据え置き
-            }
-            if (args.phase) {
+          let args = {};
+          try {
+            args = JSON.parse(call.arguments ?? "{}");
+          } catch {
+            // 引数が壊れていたら何も変えない（フェーズ据え置き・障害なし）
+          }
+          if (call.name === "advance_phase" || call.name === "inject_failure") {
+            if (call.name === "advance_phase" && args.phase) {
               phaseRef.current = args.phase;
               setPhase(args.phase);
+              // まとめに入ったら障害の表示は片付ける
+              if (args.phase === "wrap_up") {
+                setFailedComponentId(null);
+              }
+            }
+            if (call.name === "inject_failure" && args.componentId) {
+              setFailedComponentId(args.componentId);
+              if (!injectedFailuresRef.current.includes(args.componentId)) {
+                injectedFailuresRef.current = [
+                  ...injectedFailuresRef.current,
+                  args.componentId
+                ];
+              }
             }
             driverRef.current?.send({
               type: "conversation.item.create",
@@ -252,6 +270,8 @@ export function useRealtimeInterview({ onEnded }) {
       endedRef.current = false;
       pendingEndRef.current = false;
       audioPlayingRef.current = false;
+      injectedFailuresRef.current = [];
+      setFailedComponentId(null);
       clearEndTimers();
       try {
         if (mock) {
@@ -339,6 +359,7 @@ export function useRealtimeInterview({ onEnded }) {
     transcript,
     micMuted,
     errorMessage,
+    failedComponentId,
     audioRef,
     connect,
     pushBoardSnapshot,

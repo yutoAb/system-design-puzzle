@@ -1092,7 +1092,37 @@ button:disabled {
 }
 
 @media (min-width: 901px) {
+  /* 行数が場面で変わる（障害の帯・メモ欄）ので、ホワイトボードだけを伸ばす */
   .interview-body .canvas-wrap {
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    display: flex;
+    flex-direction: column;
   }
+
+  .interview-body .canvas {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* 障害注入 */
+.failure-banner {
+  background: #fbe3df;
+  border: 2px solid #b3372a;
+  border-radius: 6px;
+  color: #b3372a;
+  font-weight: 700;
+  margin: 0;
+  padding: 8px 12px;
+}
+
+.react-flow__node.failed .canvas-node {
+  background: #fbe3df;
+  border-color: #b3372a;
+  border-style: dashed;
+  box-shadow: 3px 3px 0 #b3372a;
+}
+
+.react-flow__node.failed .canvas-node-icon {
+  filter: grayscale(1);
+  opacity: 0.6;
 }

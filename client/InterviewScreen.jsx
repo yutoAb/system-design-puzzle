@@ -4,6 +4,10 @@ import {
   localizeChallenge,
   localizeComponents
 } from "../src/domain/interview/language.js";
+import {
+  analyzeBoard,
+  formatBoardAnalysis
+} from "../src/domain/interview/analyzeBoard.js";
 import { serializeBoard } from "../src/domain/interview/serializeBoard.js";
 import { Canvas } from "./Canvas.jsx";
 import { MOCK_BOARD_SCRIPT } from "./mockBoardScript.js";
@@ -72,6 +76,7 @@ export function InterviewScreen({
     transcript,
     micMuted,
     errorMessage,
+    failedComponentId,
     audioRef,
     connect,
     pushBoardSnapshot,
@@ -115,21 +120,26 @@ export function InterviewScreen({
       return undefined;
     }
     const timer = setTimeout(() => {
-      const boardText = serializeBoard(
-        {
-          componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
-          connections: edges.map((edge) => [edge.source, edge.target]),
-          notes
-        },
+      const board = {
+        componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
+        connections: edges.map((edge) => [edge.source, edge.target]),
+        notes
+      };
+      // 図をコードで解析した結果を、面接官だけに見えるメモとして添える
+      const analysisText = formatBoardAnalysis(
+        analyzeBoard(board, challenge, components),
         components
       );
+      const boardText = [serializeBoard(board, components), analysisText]
+        .filter(Boolean)
+        .join("\n");
       if (boardText !== lastSnapshotRef.current) {
         lastSnapshotRef.current = boardText;
         pushBoardSnapshot(boardText);
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [nodes, edges, notes, status, components, pushBoardSnapshot]);
+  }, [nodes, edges, notes, status, challenge, components, pushBoardSnapshot]);
 
   // 面接中の離脱はチケットも結果も失うので、タブを閉じる前に確認を出す
   useEffect(() => {
@@ -273,6 +283,7 @@ export function InterviewScreen({
               setEdges={setEdges}
               components={components}
               mock={mock}
+              failedComponentId={failedComponentId}
               notes={notes}
               onNotesChange={setNotes}
               english={english}

@@ -68,7 +68,7 @@ export function ChallengeSelect({
         {purchaseError && <p className="start-blocked">{purchaseError}</p>}
         {mock && (
           <p className="demo-banner">
-            デモモードです。面接官の応答はあらかじめ用意した台本で、マイクは使いません（約20秒で終わります）。
+            デモモードです。面接官の応答はあらかじめ用意した台本で、マイクは使いません（約30秒で終わります）。
             <a href="/">通常モードに戻る</a>
           </p>
         )}

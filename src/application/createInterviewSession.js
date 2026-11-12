@@ -1,6 +1,6 @@
 import { buildInterviewerInstructions } from "../domain/interview/buildInterviewerInstructions.js";
 import { normalizeLanguage } from "../domain/interview/language.js";
-import { realtimeTools } from "../domain/interview/realtimeTools.js";
+import { buildRealtimeTools } from "../domain/interview/realtimeTools.js";
 
 export const REALTIME_MODEL = "gpt-realtime";
 
@@ -20,9 +20,10 @@ export function createCreateInterviewSession({
       throw new Error(`unknown challenge: ${challengeId}`);
     }
 
+    const componentCatalog = componentRepository.findAll();
     const instructions = buildInterviewerInstructions(
       challenge,
-      componentRepository.findAll(),
+      componentCatalog,
       { durationMode, language: interviewLanguage }
     );
 
@@ -39,7 +40,7 @@ export function createCreateInterviewSession({
           },
           output: { voice: "marin" }
         },
-        tools: realtimeTools,
+        tools: buildRealtimeTools(componentCatalog),
         tool_choice: "auto"
       }
     });

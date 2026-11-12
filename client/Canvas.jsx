@@ -18,6 +18,7 @@ export function Canvas({
   setEdges,
   components,
   mock,
+  failedComponentId,
   notes,
   onNotesChange,
   english,
@@ -117,6 +118,19 @@ export function Canvas({
     [components, nodes, screenToFlowPosition, setNodes]
   );
 
+  // 障害注入: 面接官が落としたピースを赤く見せる（盤面のデータ自体は変えない）
+  const displayNodes = useMemo(
+    () =>
+      nodes.map((node) =>
+        node.id === failedComponentId ? { ...node, className: "failed" } : node
+      ),
+    [nodes, failedComponentId]
+  );
+  const failedName = failedComponentId
+    ? (components.find((item) => item.id === failedComponentId)?.name ??
+      failedComponentId)
+    : null;
+
   const styledEdges = useMemo(
     () =>
       edges.map((edge) => ({
@@ -140,9 +154,16 @@ export function Canvas({
           </button>
         </div>
       </div>
+      {failedName && (
+        <p className="failure-banner" role="status">
+          {english
+            ? `Failure injected: ${failedName} is down. Explain the impact and how you would recover.`
+            : `障害発生: 「${failedName}」が停止しました。影響と対処を説明してください。`}
+        </p>
+      )}
       <div className="canvas" onDragOver={onDragOver} onDrop={onDrop}>
         <ReactFlow
-          nodes={nodes}
+          nodes={displayNodes}
           edges={styledEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
