@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
+import {
+  localizeChallenge,
+  localizeComponents
+} from "../src/domain/interview/language.js";
 import { serializeBoard } from "../src/domain/interview/serializeBoard.js";
 import { Canvas } from "./Canvas.jsx";
 import { MOCK_BOARD_SCRIPT } from "./mockBoardScript.js";
@@ -48,8 +52,9 @@ function buildNode(componentId, position, components) {
 
 export function InterviewScreen({
   challenge,
-  components,
+  components: componentCatalog,
   durationMode,
+  language,
   accessToken,
   mock,
   nodes,
@@ -70,6 +75,17 @@ export function InterviewScreen({
     toggleMic,
     endInterview
   } = useRealtimeInterview({ onEnded: onFinished });
+
+  // 英語モードでは、お題・要件・ピース名を英語で見せる（本番の画面に近づける）
+  const components = useMemo(
+    () => localizeComponents(componentCatalog, language),
+    [componentCatalog, language]
+  );
+  const brief = useMemo(
+    () => localizeChallenge(challenge, language),
+    [challenge, language]
+  );
+  const english = language === "en";
 
   const [elapsed, setElapsed] = useState(0);
   const [confirmingEnd, setConfirmingEnd] = useState(false);
@@ -163,8 +179,11 @@ export function InterviewScreen({
     <div className="interview-screen">
       <header className="interview-header">
         <div className="interview-title">
-          <p className="eyebrow">システム設計 模擬面接{mock ? "（デモ）" : ""}</p>
-          <h1>{challenge.title}</h1>
+          <p className="eyebrow">
+            システム設計 模擬面接{mock ? "（デモ）" : ""}
+            {english ? "（English）" : ""}
+          </p>
+          <h1>{brief.title}</h1>
         </div>
         <PhaseIndicator phase={phase} />
         <div className="interview-controls">
@@ -183,6 +202,7 @@ export function InterviewScreen({
                 connect({
                   challengeId: challenge.id,
                   durationMode,
+                  language,
                   accessToken,
                   mock
                 })
@@ -237,7 +257,7 @@ export function InterviewScreen({
 
       <div className="interview-body">
         <aside className="interview-side">
-          <Requirements challenge={challenge} />
+          <Requirements challenge={brief} english={english} />
           <TranscriptPanel transcript={transcript} />
         </aside>
         <main className="workspace">

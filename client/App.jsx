@@ -14,6 +14,7 @@ export function App() {
   const [components, setComponents] = useState([]);
   const [activeChallengeId, setActiveChallengeId] = useState(undefined);
   const [durationMode, setDurationMode] = useState("short");
+  const [language, setLanguage] = useState("ja");
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [report, setReport] = useState(null);
@@ -121,9 +122,11 @@ export function App() {
     [challenges, activeChallengeId]
   );
 
-  const handleStart = useCallback((challengeId, mode) => {
+  const handleStart = useCallback((challengeId, mode, interviewLanguage) => {
     setActiveChallengeId(challengeId);
     setDurationMode(mode);
+    // デモの台本は日本語のみ
+    setLanguage(isMockMode ? "ja" : (interviewLanguage ?? "ja"));
     setNodes([]);
     setEdges([]);
     setReport(null);
@@ -179,6 +182,7 @@ export function App() {
       evaluationPayloadRef.current = {
         challengeId: activeChallengeId,
         durationMode,
+        language,
         transcript: spokenEntries.map(({ role, text, phase }) => ({
           role,
           text,
@@ -191,7 +195,7 @@ export function App() {
       };
       await runEvaluation();
     },
-    [activeChallengeId, durationMode, nodes, edges, runEvaluation]
+    [activeChallengeId, durationMode, language, nodes, edges, runEvaluation]
   );
 
   const handleRestart = useCallback(() => {
@@ -224,6 +228,7 @@ export function App() {
         challenge={activeChallenge}
         components={components}
         durationMode={durationMode}
+        language={language}
         accessToken={auth.accessToken}
         mock={isMockMode}
         nodes={nodes}

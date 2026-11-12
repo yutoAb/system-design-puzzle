@@ -36,6 +36,7 @@ export function ChallengeSelect({
   onStart
 }) {
   const [durationMode, setDurationMode] = useState("short");
+  const [language, setLanguage] = useState("ja");
   const signedIn = Boolean(auth?.user);
 
   // モックはゲートなし。ログイン済みなら残高の有無で判定
@@ -153,6 +154,42 @@ export function ChallengeSelect({
             フル（約40分）
           </label>
         </div>
+        {/* デモの台本は日本語だけなので、言語の切替は本番の面接でのみ出す */}
+        {!mock && !showPitch && (
+          <>
+            <div
+              className="duration-toggle"
+              role="radiogroup"
+              aria-label="面接の言語"
+            >
+              <label className={language === "ja" ? "active" : ""}>
+                <input
+                  type="radio"
+                  name="language"
+                  value="ja"
+                  checked={language === "ja"}
+                  onChange={() => setLanguage("ja")}
+                />
+                日本語で面接
+              </label>
+              <label className={language === "en" ? "active" : ""}>
+                <input
+                  type="radio"
+                  name="language"
+                  value="en"
+                  checked={language === "en"}
+                  onChange={() => setLanguage("en")}
+                />
+                English で面接（講評は日本語）
+              </label>
+            </div>
+            {language === "en" && (
+              <p className="language-note">
+                面接官は英語で話し、お題と要件も英語で表示されます。終了後のレポートは日本語で、設計の評価に加えて英語表現の言い換え例が付きます。
+              </p>
+            )}
+          </>
+        )}
       </header>
       <div className="challenge-cards">
         {challenges.map((challenge) => (
@@ -172,7 +209,7 @@ export function ChallengeSelect({
                 type="button"
                 className="primary"
                 disabled={Boolean(startBlockedReason)}
-                onClick={() => onStart(challenge.id, durationMode)}
+                onClick={() => onStart(challenge.id, durationMode, language)}
               >
                 {mock ? "この課題のデモを見る" : "この課題で面接を始める"}
               </button>

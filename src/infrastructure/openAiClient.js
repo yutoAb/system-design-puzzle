@@ -22,6 +22,18 @@ const MOCK_EVALUATION_REPORT = {
   ]
 };
 
+const MOCK_ENGLISH_FEEDBACK = {
+  summary:
+    "モックモードの英語講評です。設計の意図はおおむね伝わっていますが、結論を先に述べるとさらに伝わりやすくなります。",
+  phrases: [
+    {
+      said: "I think maybe we use cache.",
+      better: "I'd put a cache in front of the database to absorb read traffic.",
+      note: "何のためにどこへ置くかを一文で言い切ると、設計意図が明確になります（モック）"
+    }
+  ]
+};
+
 export function createOpenAiClient({
   apiKey,
   mock = false,
@@ -32,7 +44,14 @@ export function createOpenAiClient({
       async createClientSecret() {
         return { value: "ek_mock", expires_at: 0 };
       },
-      async createStructuredResponse() {
+      async createStructuredResponse({ jsonSchema } = {}) {
+        // 英語モードのスキーマで呼ばれたら、英語表現の講評も返す
+        if (jsonSchema?.schema?.properties?.englishFeedback) {
+          return {
+            ...MOCK_EVALUATION_REPORT,
+            englishFeedback: MOCK_ENGLISH_FEEDBACK
+          };
+        }
         return MOCK_EVALUATION_REPORT;
       }
     };

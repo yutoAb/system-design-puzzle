@@ -2,6 +2,7 @@ export const componentCatalog = [
   {
     id: "client",
     name: "クライアント",
+    nameEn: "Client",
     stage: "クライアント",
     description: "Webブラウザやモバイルアプリなど、システムを利用するユーザー側の起点です。",
     concepts: ["クライアント"],
@@ -15,6 +16,7 @@ export const componentCatalog = [
   {
     id: "cdn",
     name: "CDN",
+    nameEn: "CDN",
     stage: "エッジ",
     description: "動画や静的ファイルを視聴者に近い場所から配信します。",
     concepts: ["CDN", "キャッシュ", "低レイテンシ"],
@@ -28,6 +30,7 @@ export const componentCatalog = [
   {
     id: "websocket-gateway",
     name: "WebSocketゲートウェイ",
+    nameEn: "WebSocket Gateway",
     stage: "エッジ",
     description: "常時接続のソケットを束ね、リアルタイムな双方向通信を中継します。",
     concepts: ["WebSocket", "リアルタイム", "常時接続"],
@@ -41,6 +44,7 @@ export const componentCatalog = [
   {
     id: "load-balancer",
     name: "ロードバランサー",
+    nameEn: "Load Balancer",
     stage: "流量制御",
     description: "リクエストを複数のアプリケーションサーバーへ分散します。",
     concepts: ["負荷分散", "水平スケーリング"],
@@ -54,6 +58,7 @@ export const componentCatalog = [
   {
     id: "application-service",
     name: "アプリケーションサーバー",
+    nameEn: "Application Server",
     stage: "サービス",
     description: "APIリクエストを処理し、システム全体の動きを調整します。",
     concepts: ["ステートレス", "水平スケーリング"],
@@ -67,6 +72,7 @@ export const componentCatalog = [
   {
     id: "object-storage",
     name: "オブジェクトストレージ",
+    nameEn: "Object Storage",
     stage: "保存",
     description: "動画ファイル、サムネイル、生成済みファイルを保存します。",
     concepts: ["オブジェクトストレージ", "耐久性"],
@@ -80,6 +86,7 @@ export const componentCatalog = [
   {
     id: "relational-database",
     name: "リレーショナルDB",
+    nameEn: "Relational DB",
     stage: "保存",
     description: "ユーザー、動画メタデータ、権限、契約情報を保存します。",
     concepts: ["リレーショナルデータ", "メタデータ"],
@@ -93,6 +100,7 @@ export const componentCatalog = [
   {
     id: "db-replica",
     name: "DBレプリカ",
+    nameEn: "DB Replica",
     stage: "保存",
     description: "読み取り用の複製DBを追加し、可用性と読み取り性能を高めます。",
     concepts: ["レプリケーション", "読み取りスケーリング"],
@@ -106,6 +114,7 @@ export const componentCatalog = [
   {
     id: "cache",
     name: "キャッシュ",
+    nameEn: "Cache",
     stage: "サービス",
     description: "繰り返し発生する読み取りを減らし、背後のサービスを守ります。",
     concepts: ["キャッシュ", "低レイテンシ"],
@@ -119,6 +128,7 @@ export const componentCatalog = [
   {
     id: "queue",
     name: "メッセージキュー",
+    nameEn: "Message Queue",
     stage: "非同期",
     description: "非同期処理をためて、急なアクセス増加を吸収します。",
     concepts: ["キューイング", "バックプレッシャー"],
@@ -132,6 +142,7 @@ export const componentCatalog = [
   {
     id: "pubsub",
     name: "Pub/Subバス",
+    nameEn: "Pub/Sub Bus",
     stage: "非同期",
     description: "発行したメッセージを複数の購読者へファンアウトします。",
     concepts: ["Pub/Sub", "ファンアウト", "リアルタイム"],
@@ -145,6 +156,7 @@ export const componentCatalog = [
   {
     id: "fanout-worker",
     name: "ファンアウトワーカー",
+    nameEn: "Fan-out Worker",
     stage: "非同期",
     description: "投稿をフォロワーのタイムラインへ書き込み、配信を事前計算します。",
     concepts: ["ファンアウト", "非同期処理", "タイムライン生成"],
@@ -158,6 +170,7 @@ export const componentCatalog = [
   {
     id: "rate-limiter",
     name: "レートリミッター",
+    nameEn: "Rate Limiter",
     stage: "流量制御",
     description: "APIを乱用や急な書き込み増加から守ります。",
     concepts: ["レート制限", "流量制御"],
@@ -171,6 +184,7 @@ export const componentCatalog = [
   {
     id: "consistent-hash",
     name: "コンシステントハッシュ",
+    nameEn: "Consistent Hashing",
     stage: "データ分散",
     description: "キャッシュやストレージの担当範囲を、少ない再配置で分散します。",
     concepts: ["コンシステントハッシュ", "パーティショニング"],
@@ -184,6 +198,7 @@ export const componentCatalog = [
   {
     id: "key-value-store",
     name: "キーバリューストア",
+    nameEn: "Key-Value Store",
     stage: "保存",
     description: "単純な参照パターンを高速かつ大規模に処理します。",
     concepts: ["キーバリューストア", "水平スケーリング"],
@@ -197,6 +212,7 @@ export const componentCatalog = [
   {
     id: "analytics-pipeline",
     name: "分析パイプライン",
+    nameEn: "Analytics Pipeline",
     stage: "非同期",
     description: "視聴イベントを集め、指標や推薦に使える形へ流します。",
     concepts: ["分析", "イベントストリーム"],
