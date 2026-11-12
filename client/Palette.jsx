@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ComponentIcon } from "./icons.jsx";
 
-export function Palette({ components, placedComponentIds }) {
+export function Palette({ components, placedComponentIds, compact }) {
   const items = useMemo(
     () =>
       components.map((component) => ({
@@ -39,7 +39,8 @@ export function Palette({ components, placedComponentIds }) {
             <span className="component-option-text">
               <strong>{component.name}</strong>
               <em>{component.stage}</em>
-              <small>{component.description}</small>
+              {/* 本番仕様では、説明文が答えのヒントにならないよう名前だけにする */}
+              {!compact && <small>{component.description}</small>}
             </span>
             {component.isPlaced && <span className="placed-badge">配置済み</span>}
           </article>

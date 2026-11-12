@@ -18,6 +18,9 @@ export function Canvas({
   setEdges,
   components,
   mock,
+  notes,
+  onNotesChange,
+  english,
   onReset
 }) {
   const wrapperRef = useRef(null);
@@ -157,6 +160,26 @@ export function Canvas({
           <Controls position="bottom-left" />
         </ReactFlow>
       </div>
+      {/* 実際の面接では、図のほかに要件・概算・API も書きながら話す */}
+      {onNotesChange && !mock && (
+        <label className="board-notes">
+          <span>
+            {english
+              ? "Notes (requirements, estimates, API, data model) — shared with the interviewer"
+              : "メモ（要件・容量の概算・API・データモデルなど）— 面接官にも共有されます"}
+          </span>
+          <textarea
+            value={notes}
+            maxLength={4000}
+            onChange={(event) => onNotesChange(event.target.value)}
+            placeholder={
+              english
+                ? "e.g. 500k concurrent viewers / 2 Mbps each = 1 Tbps egress"
+                : "例: 同時視聴50万人 × 2Mbps = 1Tbps の帯域"
+            }
+          />
+        </label>
+      )}
     </div>
   );
 }

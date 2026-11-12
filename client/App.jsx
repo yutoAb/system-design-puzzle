@@ -15,6 +15,8 @@ export function App() {
   const [activeChallengeId, setActiveChallengeId] = useState(undefined);
   const [durationMode, setDurationMode] = useState("short");
   const [language, setLanguage] = useState("ja");
+  const [strictMode, setStrictMode] = useState(false);
+  const [notes, setNotes] = useState("");
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [report, setReport] = useState(null);
@@ -122,11 +124,13 @@ export function App() {
     [challenges, activeChallengeId]
   );
 
-  const handleStart = useCallback((challengeId, mode, interviewLanguage) => {
+  const handleStart = useCallback((challengeId, mode, interviewLanguage, strict) => {
     setActiveChallengeId(challengeId);
     setDurationMode(mode);
     // デモの台本は日本語のみ
     setLanguage(isMockMode ? "ja" : (interviewLanguage ?? "ja"));
+    setStrictMode(!isMockMode && Boolean(strict));
+    setNotes("");
     setNodes([]);
     setEdges([]);
     setReport(null);
@@ -190,12 +194,13 @@ export function App() {
         })),
         board: {
           componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
-          connections: edges.map((edge) => [edge.source, edge.target])
+          connections: edges.map((edge) => [edge.source, edge.target]),
+          notes
         }
       };
       await runEvaluation();
     },
-    [activeChallengeId, durationMode, language, nodes, edges, runEvaluation]
+    [activeChallengeId, durationMode, language, nodes, edges, notes, runEvaluation]
   );
 
   const handleRestart = useCallback(() => {
@@ -229,6 +234,9 @@ export function App() {
         components={components}
         durationMode={durationMode}
         language={language}
+        strictMode={strictMode}
+        notes={notes}
+        setNotes={setNotes}
         accessToken={auth.accessToken}
         mock={isMockMode}
         nodes={nodes}
