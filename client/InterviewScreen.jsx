@@ -55,6 +55,9 @@ export function InterviewScreen({
   components: componentCatalog,
   durationMode,
   language,
+  strictMode,
+  notes,
+  setNotes,
   accessToken,
   mock,
   nodes,
@@ -115,7 +118,8 @@ export function InterviewScreen({
       const boardText = serializeBoard(
         {
           componentIds: [...new Set(nodes.map((node) => node.data.componentId))],
-          connections: edges.map((edge) => [edge.source, edge.target])
+          connections: edges.map((edge) => [edge.source, edge.target]),
+          notes
         },
         components
       );
@@ -125,7 +129,7 @@ export function InterviewScreen({
       }
     }, 2000);
     return () => clearTimeout(timer);
-  }, [nodes, edges, status, components, pushBoardSnapshot]);
+  }, [nodes, edges, notes, status, components, pushBoardSnapshot]);
 
   // 面接中の離脱はチケットも結果も失うので、タブを閉じる前に確認を出す
   useEffect(() => {
@@ -257,7 +261,7 @@ export function InterviewScreen({
 
       <div className="interview-body">
         <aside className="interview-side">
-          <Requirements challenge={brief} english={english} />
+          <Requirements challenge={brief} english={english} strict={strictMode} />
           <TranscriptPanel transcript={transcript} />
         </aside>
         <main className="workspace">
@@ -269,9 +273,13 @@ export function InterviewScreen({
               setEdges={setEdges}
               components={components}
               mock={mock}
+              notes={notes}
+              onNotesChange={setNotes}
+              english={english}
               onReset={resetBoard}
             />
             <Palette
+              compact={strictMode}
               components={components}
               placedComponentIds={
                 new Set(nodes.map((node) => node.data.componentId))

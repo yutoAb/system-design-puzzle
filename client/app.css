@@ -1036,3 +1036,63 @@ button:disabled {
   font-weight: 700;
   padding: 2px 10px;
 }
+
+/* 本番仕様とメモ欄 */
+.strict-toggle {
+  align-items: flex-start;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  max-width: 760px;
+}
+
+.strict-toggle input {
+  height: 18px;
+  margin-top: 3px;
+  width: 18px;
+}
+
+.strict-toggle span {
+  display: grid;
+  gap: 2px;
+}
+
+.strict-toggle small {
+  color: #4a554e;
+  line-height: 1.6;
+}
+
+.requirements-prompt {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.board-notes {
+  display: grid;
+  gap: 6px;
+}
+
+.board-notes span {
+  color: #5c6660;
+  font-size: 13px;
+}
+
+.board-notes textarea {
+  background: #ffffff;
+  border: 2px solid #29322d;
+  border-radius: 6px;
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  height: 120px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: none;
+}
+
+@media (min-width: 901px) {
+  .interview-body .canvas-wrap {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+}

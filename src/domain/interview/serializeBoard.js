@@ -3,6 +3,9 @@ function componentName(componentId, componentCatalog) {
   return component ? component.name : componentId;
 }
 
+// 候補者が書いたメモは面接官と評価にそのまま渡るので、長さに上限を設ける
+export const MAX_NOTES_LENGTH = 4000;
+
 export function serializeBoard(board, componentCatalog) {
   const componentIds = board?.componentIds ?? [];
   const connections = board?.connections ?? [];
@@ -24,6 +27,14 @@ export function serializeBoard(board, componentCatalog) {
       )
       .join("、");
     lines.push(`接続: ${connectionText}`);
+  }
+
+  const notes =
+    typeof board?.notes === "string"
+      ? board.notes.trim().slice(0, MAX_NOTES_LENGTH)
+      : "";
+  if (notes !== "") {
+    lines.push("[候補者のメモ]", notes);
   }
 
   return lines.join("\n");

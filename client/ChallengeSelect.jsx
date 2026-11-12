@@ -37,6 +37,7 @@ export function ChallengeSelect({
 }) {
   const [durationMode, setDurationMode] = useState("short");
   const [language, setLanguage] = useState("ja");
+  const [strictMode, setStrictMode] = useState(false);
   const signedIn = Boolean(auth?.user);
 
   // モックはゲートなし。ログイン済みなら残高の有無で判定
@@ -191,6 +192,19 @@ export function ChallengeSelect({
                 面接官は英語で話し、お題と要件も英語で表示されます。終了後のレポートは日本語で、設計の評価に加えて英語表現の言い換え例が付きます。
               </p>
             )}
+            <label className="strict-toggle">
+              <input
+                type="checkbox"
+                checked={strictMode}
+                onChange={(event) => setStrictMode(event.target.checked)}
+              />
+              <span>
+                <strong>本番仕様で練習する</strong>
+                <small>
+                  機能要件・非機能要件とピースの説明を画面に出しません。実際の面接と同じように、面接官に質問して前提を引き出します。
+                </small>
+              </span>
+            </label>
           </>
         )}
       </header>
@@ -215,7 +229,9 @@ export function ChallengeSelect({
                 type="button"
                 className="primary"
                 disabled={Boolean(startBlockedReason)}
-                onClick={() => onStart(challenge.id, durationMode, language)}
+                onClick={() =>
+                  onStart(challenge.id, durationMode, language, strictMode)
+                }
               >
                 {mock ? "この課題のデモを見る" : "この課題で面接を始める"}
               </button>
