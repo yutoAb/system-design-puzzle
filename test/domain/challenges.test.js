@@ -12,20 +12,18 @@ import { componentCatalog } from "../../src/domain/fixtures/components.js";
 const componentIds = new Set(componentCatalog.map((component) => component.id));
 
 describe("challenges fixture", () => {
-  it("exposes all three challenges", () => {
+  it("exposes every challenge with a unique id, starting with the original three", () => {
     const ids = challenges.map((challenge) => challenge.id);
-    assert.deepEqual(ids, [
+    assert.deepEqual(ids.slice(0, 3), [
       videoStreamingChallenge.id,
       chatServiceChallenge.id,
       socialFeedChallenge.id
     ]);
+    assert.equal(new Set(ids).size, ids.length);
+    assert.equal(ids.length, 5);
   });
 
-  for (const challenge of [
-    videoStreamingChallenge,
-    chatServiceChallenge,
-    socialFeedChallenge
-  ]) {
+  for (const challenge of challenges) {
     describe(`${challenge.id}`, () => {
       it("references only known components", () => {
         for (const componentId of challenge.requiredComponentIds) {
@@ -70,6 +68,18 @@ describe("challenges fixture", () => {
         assert.ok(challenge.targetConcepts.length > 0);
         assert.ok(challenge.recommendations.length > 0);
         assert.ok(challenge.interviewPrompts.length > 0);
+        assert.ok(challenge.category.length > 0);
+        // 模範解答の図は、必須のピースと接続をすべて含む
+        for (const componentId of challenge.requiredComponentIds) {
+          assert.ok(
+            componentId in challenge.referenceLayout,
+            `reference layout lacks required component: ${componentId}`
+          );
+        }
+        for (const [a, b] of challenge.referenceConnections) {
+          assert.ok(a in challenge.referenceLayout, `edge from unplaced: ${a}`);
+          assert.ok(b in challenge.referenceLayout, `edge to unplaced: ${b}`);
+        }
       });
     });
   }

@@ -48,6 +48,9 @@ export function ChallengeSelect({
         ? "面接を始めるにはログインしてください"
         : null;
 
+  // デモの台本と自動配置は最初のお題に合わせて書かれているので、デモではそれだけを出す
+  const visibleChallenges = mock ? challenges.slice(0, 1) : challenges;
+
   // 未ログインの訪問者には、ログインを求める前に何が体験できるかを説明する
   const showPitch = !mock && Boolean(auth?.enabled) && !auth.loading && !signedIn;
 
@@ -192,8 +195,11 @@ export function ChallengeSelect({
         )}
       </header>
       <div className="challenge-cards">
-        {challenges.map((challenge) => (
+        {visibleChallenges.map((challenge) => (
           <article key={challenge.id} className="challenge-card">
+            {challenge.category && (
+              <span className="challenge-category">{challenge.category}</span>
+            )}
             <h2>{challenge.title}</h2>
             <p>{challenge.prompt}</p>
             {showPitch ? (
